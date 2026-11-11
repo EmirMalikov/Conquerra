@@ -5,6 +5,7 @@ import { html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { ClientEnv } from "src/client/ClientEnv";
 import { getDesktopSessionState } from "./Auth";
+import { SERVER_LIST_API_ENABLED } from "./BuildFlags";
 import "./components/IOSAddToHomeScreenBanner";
 import {
   canJoinTrustedLobby,
@@ -53,6 +54,16 @@ import {
 import { isReplayShellHost } from "./VersionedReplay";
 
 const DISABLED = "opacity-50 cursor-not-allowed pointer-events-none";
+
+/**
+ * Whether an unreachable server-list API should gate anything. Only when the
+ * build has that API (BuildFlags.SERVER_LIST_API_ENABLED): without it the
+ * client always uses the page's own game server, so the API being down is
+ * the normal state and must not block private lobbies or joins.
+ */
+export function backendOutageMatters(): boolean {
+  return SERVER_LIST_API_ENABLED;
+}
 
 /**
  * THE REACHABILITY RULE (OPE-439). Stated once, here; every other call site
@@ -418,7 +429,8 @@ export class GameModeSelector extends LitElement {
     // unreachable on the web, and the heartbeat's first attempts often settle
     // before this element exists (it is started in Main's initialize, we are
     // rendered by <play-page> later), so the event alone would miss them.
-    this.backendOutage = backendUnreachableConfirmed();
+    this.backendOutage =
+      backendOutageMatters() && backendUnreachableConfirmed();
     document.addEventListener(
       "backend-reachability",
       this.onBackendReachability,
@@ -511,9 +523,9 @@ export class GameModeSelector extends LitElement {
   };
 
   private onBackendReachability = (e: Event) => {
-    this.backendOutage = (
-      e as CustomEvent<BackendReachabilityDetail>
-    ).detail.confirmed;
+    this.backendOutage =
+      backendOutageMatters() &&
+      (e as CustomEvent<BackendReachabilityDetail>).detail.confirmed;
   };
 
   public stop() {

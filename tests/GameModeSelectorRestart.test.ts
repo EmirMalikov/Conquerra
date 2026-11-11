@@ -1,6 +1,16 @@
 // @vitest-environment jsdom
 import type { PublicGames } from "@openfront/shared/WireSchemas";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// These tests cover upstream's server-list API gate, which this build keeps
+// behind BuildFlags.SERVER_LIST_API_ENABLED (off): turn it on, switchable.
+const buildFlags = vi.hoisted(() => ({ serverListApi: true }));
+vi.mock("../src/client/BuildFlags", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../src/client/BuildFlags")>()),
+  get SERVER_LIST_API_ENABLED() {
+    return buildFlags.serverListApi;
+  },
+}));
 import { capturePagePin, resetPagePinForTests } from "../src/client/PagePin";
 
 // OPE-255. The component stops its public-lobby socket when a game starts

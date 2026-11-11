@@ -6,6 +6,16 @@ import type {
   PublicGames,
 } from "@openfront/shared/WireSchemas";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// These tests cover upstream's server-list API gate, which this build keeps
+// behind BuildFlags.SERVER_LIST_API_ENABLED (off): turn it on, switchable.
+const buildFlags = vi.hoisted(() => ({ serverListApi: true }));
+vi.mock("../src/client/BuildFlags", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../src/client/BuildFlags")>()),
+  get SERVER_LIST_API_ENABLED() {
+    return buildFlags.serverListApi;
+  },
+}));
 import { ClientEnv } from "../src/client/ClientEnv";
 // This named import also registers <game-mode-selector> as a side effect.
 import { shouldBlockMultiplayerAction } from "../src/client/GameModeSelector";
@@ -508,5 +518,27 @@ describe("shouldBlockMultiplayerAction with a needs-account session", () => {
         ),
       ).toBe(true);
     }
+  });
+});
+
+describe("without a server-list API (this build)", () => {
+  afterEach(() => {
+    buildFlags.serverListApi = true;
+  });
+
+  it("never gates Invite or Join with code on the API being down", async () => {
+    buildFlags.serverListApi = false;
+    await confirmOutage();
+    selector = await mountSelector();
+    // The heartbeat still reports the outage; the selector must not care.
+    await announce(false, true);
+
+    clickEveryButton();
+
+    expect(hostOpen).toHaveBeenCalled();
+    expect(joinOpen).toHaveBeenCalled();
+    expect(messages).toEqual([]);
+    // The public match list is not swapped for the "unreachable" notice.
+    expect(lobbyCardButton()).not.toBeNull();
   });
 });
