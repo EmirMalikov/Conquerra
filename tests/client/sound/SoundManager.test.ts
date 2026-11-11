@@ -5,6 +5,15 @@ let nextPlayId = 1;
 const originalMatches = Element.prototype.matches;
 const { howlerVolume } = vi.hoisted(() => ({ howlerVolume: vi.fn() }));
 
+vi.mock("../../../src/client/sound/MusicTracks", () => ({
+  MENU_THEME_PATH: null,
+  GAMEPLAY_TRACKS: [
+    "sounds/music/gameplay.mp3",
+    "sounds/music/gameplay-2.mp3",
+    "sounds/music/gameplay-3.mp3",
+  ],
+}));
+
 vi.mock("howler", () => {
   class MockHowl {
     src: string;

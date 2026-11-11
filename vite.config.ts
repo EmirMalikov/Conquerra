@@ -16,7 +16,6 @@ import {
   buildPublicAssetManifest,
   copyRootPublicFiles,
   createHashedPublicAssetFiles,
-  getProprietaryDir,
   getPublicDir,
   getResourcesDir,
   writePublicAssetManifest,
@@ -107,34 +106,6 @@ function serveRootPublicDir(publicDir: string): Plugin {
           return next();
         if (rel === "" || rel.endsWith("/")) rel += "index.html";
         const filePath = path.join(publicDir, rel);
-        if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile())
-          return next();
-        const mime = lookupMime(filePath);
-        if (mime) res.setHeader("Content-Type", mime);
-        res.setHeader("Cache-Control", "no-store");
-        fs.createReadStream(filePath).pipe(res);
-      });
-    },
-  };
-}
-
-function serveProprietaryDir(
-  proprietaryDir: string,
-  resourcesDir: string,
-): Plugin {
-  return {
-    name: "serve-proprietary-dir",
-    configureServer(server) {
-      // Must run before Vite's htmlFallback; skip when resources/ has the file
-      // so publicDir keeps precedence.
-      server.middlewares.use((req, res, next) => {
-        if (!req.url) return next();
-        const rel = decodeURIComponent(
-          new URL(req.url, "http://x").pathname,
-        ).replace(/^\//, "");
-        if (rel.includes("..")) return next();
-        if (fs.existsSync(path.join(resourcesDir, rel))) return next();
-        const filePath = path.join(proprietaryDir, rel);
         if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile())
           return next();
         const mime = lookupMime(filePath);
@@ -271,8 +242,9 @@ export default defineConfig(({ mode }) => {
     [devInstanceLetter]: { host: "localhost", numWorkers: devNumWorkers },
   });
   const resourcesDir = getResourcesDir(__dirname);
-  const proprietaryDir = getProprietaryDir(__dirname);
-  const sourceDirs = [resourcesDir, proprietaryDir];
+  // proprietary/ is All Rights Reserved upstream art and is never shipped in
+  // this build: every asset comes from resources/ (CC BY-SA 4.0) or is ours.
+  const sourceDirs = [resourcesDir];
   const assetManifest: AssetManifest = isProduction
     ? buildPublicAssetManifest(sourceDirs)
     : {};
@@ -294,9 +266,9 @@ export default defineConfig(({ mode }) => {
       : undefined,
     instanceId: JSON.stringify(env.INSTANCE_ID ?? "DEV_ID"),
     manifestHref: buildAssetUrl("manifest.json", assetManifest, cdnBase),
-    faviconHref: buildAssetUrl("images/Favicon.svg", assetManifest, cdnBase),
+    faviconHref: buildAssetUrl("images/GameEmblem.svg", assetManifest, cdnBase),
     gameplayScreenshotUrl: buildAssetUrl(
-      "images/KeyArt.jpg",
+      "images/EuropeBackground.webp",
       assetManifest,
       cdnBase,
     ),
@@ -306,11 +278,11 @@ export default defineConfig(({ mode }) => {
       cdnBase,
     ),
     desktopLogoImageUrl: buildAssetUrl(
-      "images/OpenFront.png",
+      "images/GameEmblem.svg",
       assetManifest,
       cdnBase,
     ),
-    mobileLogoImageUrl: buildAssetUrl("images/OF.png", assetManifest, cdnBase),
+    mobileLogoImageUrl: buildAssetUrl("images/GameEmblem.svg", assetManifest, cdnBase),
   };
 
   // Vite's HTML transform replaces the source <script src="/src/client/Main.ts">
@@ -338,7 +310,7 @@ export default defineConfig(({ mode }) => {
       writeRootFilesIndex(getPublicDir(resourcesDir), outDir);
       // Run the source→hashed copy first; createHashedPublicAssetFiles iterates
       // assetManifest and expects every key to resolve to a file in resources/
-      // or proprietary/. Vite's bundle output (assets/...) doesn't, so it's
+      // Vite's bundle output (assets/...) doesn't, so it's
       // merged in after.
       createHashedPublicAssetFiles(sourceDirs, outDir, assetManifest);
       // Track Vite's own bundle output (vendor chunks, JS, CSS, workers under
@@ -477,7 +449,6 @@ export default defineConfig(({ mode }) => {
       ...(!isProduction
         ? [
             serveRootPublicDir(getPublicDir(resourcesDir)),
-            serveProprietaryDir(proprietaryDir, resourcesDir),
             randomWorkerCreateProxy(devNumWorkers),
             steamLinkAliasRedirect(),
           ]

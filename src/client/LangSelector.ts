@@ -246,6 +246,7 @@ export class LangSelector extends LitElement {
 
   private applyTranslation() {
     const components = [
+      "game-wordmark",
       "banned-modal",
       "single-player-modal",
       "host-lobby-modal",

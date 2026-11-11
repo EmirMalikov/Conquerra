@@ -1,6 +1,7 @@
 import { assetUrl } from "@openfront/shared/AssetUrls";
 import { Howl } from "howler";
 import { AudioMixer, streamsMusic } from "./AudioMixer";
+import { MENU_THEME_PATH } from "./MusicTracks";
 
 // Long enough not to sound like a cut, short enough that the lobby is not
 // still playing menu music when the map appears.
@@ -199,7 +200,7 @@ export function startMenuMusic(
   };
 
   const start = () => {
-    if (theme !== null) return;
+    if (theme !== null || MENU_THEME_PATH === null) return;
     // Nothing to hear on a channel the player has turned off, and on the Web
     // Audio path starting means holding the whole theme decoded. The mixer
     // subscription below starts it if music is turned on later, so declining
@@ -210,7 +211,7 @@ export function startMenuMusic(
       // browser's volume-lock state changes between two probes.
       const streaming = streamsMusic();
       theme = new Howl({
-        src: [assetUrl("sounds/music/menu-theme.mp3")],
+        src: [assetUrl(MENU_THEME_PATH)],
         loop: true,
         volume: 0,
         // Stream rather than decode 2.2 MB up front -- see the gameplay track

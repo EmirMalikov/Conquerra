@@ -3,6 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const howlInstances: any[] = [];
 const originalMatches = Element.prototype.matches;
 
+vi.mock("../../../src/client/sound/MusicTracks", () => ({
+  MENU_THEME_PATH: "sounds/music/menu-theme.mp3",
+  GAMEPLAY_TRACKS: [],
+}));
+
 vi.mock("howler", () => {
   class MockHowl {
     src: string;

@@ -2,6 +2,7 @@ import { assetUrl } from "@openfront/shared/AssetUrls";
 import { EventBus } from "@openfront/shared/EventBus";
 import { Howl } from "howler";
 import { AudioMixer, PlayableCategory, streamsMusic } from "./AudioMixer";
+import { GAMEPLAY_TRACKS } from "./MusicTracks";
 import {
   AmbienceTrack,
   ambienceUrls,
@@ -11,16 +12,6 @@ import {
 } from "./Sounds";
 
 const AMBIENCE_FADE_MS = 500;
-
-/**
- * The gameplay playlist. A game starts on a random track and plays the rest
- * in order, round and round, so short games do not always hear the same one.
- */
-const GAMEPLAY_TRACKS = [
-  "sounds/music/gameplay.mp3",
-  "sounds/music/gameplay-2.mp3",
-  "sounds/music/gameplay-3.mp3",
-];
 
 /**
  * The audio a running game owns: the gameplay playlist and the structure
@@ -70,6 +61,7 @@ export class SoundManager {
    * menu theme (MenuMusic.ts) covers the home page.
    */
   private buildBackgroundMusic(): void {
+    if (GAMEPLAY_TRACKS.length === 0) return;
     this.safely("initialize background music", () => {
       const music = new Howl({
         src: [assetUrl(GAMEPLAY_TRACKS[this.track])],
@@ -134,7 +126,8 @@ export class SoundManager {
     this.safely("unload background music", () => old.unload());
     this.backgroundMusic = null;
     this.musicStarted = false;
-    if (advance) this.track = (this.track + 1) % GAMEPLAY_TRACKS.length;
+    if (advance && GAMEPLAY_TRACKS.length > 0)
+      this.track = (this.track + 1) % GAMEPLAY_TRACKS.length;
     this.buildBackgroundMusic();
     // Not after a failure: a file that keeps failing would retry in a loop.
     if (advance) this.startMusicIfAudible();
