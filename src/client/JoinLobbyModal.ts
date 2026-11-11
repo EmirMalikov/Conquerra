@@ -21,13 +21,14 @@ import {
   renderDuration,
   translateText,
 } from "../client/Utils";
-import { getApiBase } from "./Api";
+import { createLobby, getApiBase } from "./Api";
 import { BaseModal } from "./components/BaseModal";
 import { GameStartAlertController } from "./components/GameStartAlertController";
 import { hasMapDetails, renderMapDetails } from "./components/map/MapDetails";
 import { inviteFriendsButton } from "./components/ui/InviteFriendsButton";
 import { DEFAULT_TITLE_CLASS, modalHeader } from "./components/ui/ModalHeader";
 import { gamePortal } from "./GamePortal";
+import { whenModalLoaded } from "./LazyModals";
 import { SendSpectateEvent } from "./LobbyEvents";
 import { PublicLobbySocket } from "./LobbySocket";
 import { JoinLobbyEvent } from "./Main";
@@ -47,6 +48,9 @@ import {
 import { normaliseMapKey } from "./Utils";
 import { findVersionedShell } from "./VersionedReplay";
 
+/** Where this tab keeps the code of the private lobby it made for friends. */
+const MY_CODE_KEY = "conquerra.myLobbyCode";
+
 @customElement("join-lobby-modal")
 export class JoinLobbyModal extends BaseModal {
   @query("#lobbyIdInput") private lobbyIdInput!: HTMLInputElement;
@@ -57,6 +61,9 @@ export class JoinLobbyModal extends BaseModal {
   @state() private playerCount: number = 0;
   @state() private gameConfig: GameConfig | null = null;
   @state() private currentLobbyId: string = "";
+  /** The private lobby this player made to invite friends into, if any. */
+  @state() private myCode: string | null = null;
+  @state() private myCodeBusy = false;
   @state() private currentClientID: string = "";
   @state() private nationCount: number = 0;
   @state() private lobbyStartAt: number | null = null;
@@ -313,59 +320,196 @@ export class JoinLobbyModal extends BaseModal {
   private renderJoinForm() {
     return html`
       <div class="custom-scrollbar p-6 space-y-4 mr-1">
-        <form @submit=${this.joinLobbyFromInput}>
-          <div class="flex flex-col gap-3">
-            <div class="flex gap-2">
-              <input
-                type="text"
-                id="lobbyIdInput"
-                placeholder=${translateText("private_lobby.enter_id")}
-                @keyup=${this.handleChange}
-                class="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-sm tracking-wider"
-              />
-              <o-button
-                variant="ghost"
-                size="md"
-                iconPosition="only"
-                .title=${translateText("common.paste")}
-                .icon=${html`<svg
-                  stroke="currentColor"
-                  fill="currentColor"
-                  stroke-width="0"
-                  viewBox="0 0 32 32"
-                  height="18px"
-                  width="18px"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M 15 3 C 13.742188 3 12.847656 3.890625 12.40625 5 L 5 5 L 5 28 L 13 28 L 13 30 L 27 30 L 27 14 L 25 14 L 25 5 L 17.59375 5 C 17.152344 3.890625 16.257813 3 15 3 Z M 15 5 C 15.554688 5 16 5.445313 16 6 L 16 7 L 19 7 L 19 9 L 11 9 L 11 7 L 14 7 L 14 6 C 14 5.445313 14.445313 5 15 5 Z M 7 7 L 9 7 L 9 11 L 21 11 L 21 7 L 23 7 L 23 14 L 13 14 L 13 26 L 7 26 Z M 15 16 L 25 16 L 25 28 L 15 28 Z"
-                  ></path>
-                </svg>`}
-                @click=${this.pasteFromClipboard}
-              ></o-button>
-            </div>
-            <div class="flex gap-2">
-              <div class="flex-[2]">
-                <o-button
-                  title=${translateText("private_lobby.join_lobby")}
-                  width="block"
-                  submit
-                ></o-button>
+        <div class="grid gap-4 md:grid-cols-2">
+          <section class="tc-panel flex flex-col gap-3 p-4">
+            <h3 class="tc-label text-[var(--tc-cyan)]">
+              ${translateText("private_lobby.friend_code_title")}
+            </h3>
+            <p class="text-sm text-white/70">
+              ${translateText("private_lobby.friend_code_desc")}
+            </p>
+            <form @submit=${this.joinLobbyFromInput}>
+              <div class="flex flex-col gap-3">
+                <div class="flex gap-2">
+                  <input
+                    type="text"
+                    id="lobbyIdInput"
+                    placeholder=${translateText("private_lobby.enter_id")}
+                    @keyup=${this.handleChange}
+                    class="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-mono text-sm tracking-wider"
+                  />
+                  <o-button
+                    variant="ghost"
+                    size="md"
+                    iconPosition="only"
+                    .title=${translateText("common.paste")}
+                    .icon=${html`<svg
+                      stroke="currentColor"
+                      fill="currentColor"
+                      stroke-width="0"
+                      viewBox="0 0 32 32"
+                      height="18px"
+                      width="18px"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M 15 3 C 13.742188 3 12.847656 3.890625 12.40625 5 L 5 5 L 5 28 L 13 28 L 13 30 L 27 30 L 27 14 L 25 14 L 25 5 L 17.59375 5 C 17.152344 3.890625 16.257813 3 15 3 Z M 15 5 C 15.554688 5 16 5.445313 16 6 L 16 7 L 19 7 L 19 9 L 11 9 L 11 7 L 14 7 L 14 6 C 14 5.445313 14.445313 5 15 5 Z M 7 7 L 9 7 L 9 11 L 21 11 L 21 7 L 23 7 L 23 14 L 13 14 L 13 26 L 7 26 Z M 15 16 L 25 16 L 25 28 L 15 28 Z"
+                      ></path>
+                    </svg>`}
+                    @click=${this.pasteFromClipboard}
+                  ></o-button>
+                </div>
+                <div class="flex gap-2">
+                  <div class="flex-[2]">
+                    <o-button
+                      title=${translateText("private_lobby.join_lobby")}
+                      width="block"
+                      submit
+                    ></o-button>
+                  </div>
+                  <div class="flex-1">
+                    <o-button
+                      variant="ghost"
+                      title=${translateText("private_lobby.spectate")}
+                      width="block"
+                      @click=${this.spectateLobbyFromInput}
+                    ></o-button>
+                  </div>
+                </div>
               </div>
-              <div class="flex-1">
-                <o-button
-                  variant="ghost"
-                  title=${translateText("private_lobby.spectate")}
-                  width="block"
-                  @click=${this.spectateLobbyFromInput}
-                ></o-button>
-              </div>
-            </div>
-          </div>
-        </form>
+            </form>
+          </section>
+          ${this.renderMyCode()}
+        </div>
         ${this.renderHostedLobbies()}
       </div>
     `;
+  }
+
+  /**
+   * "Your code": the other half of playing with a friend. Makes a private
+   * lobby (the server mints its id, which is the code), shows it with a copy
+   * button, and opens it as host. Kept for the tab's session, so closing and
+   * reopening this page shows the same code while the lobby is still open.
+   */
+  private renderMyCode() {
+    return html`
+      <section class="tc-panel flex flex-col gap-3 p-4">
+        <h3 class="tc-label text-[var(--tc-accent)]">
+          ${translateText("private_lobby.my_code_title")}
+        </h3>
+        <p class="text-sm text-white/70">
+          ${translateText("private_lobby.my_code_desc")}
+        </p>
+        ${
+          this.myCode === null
+            ? html`<button
+                type="button"
+                class="tc-btn-primary h-12 text-base ${
+                  this.myCodeBusy ? "opacity-60 pointer-events-none" : ""
+                }"
+                ?disabled=${this.myCodeBusy}
+                @click=${this.createMyCode}
+              >
+                ${translateText("private_lobby.my_code_get")}
+              </button>`
+            : html`<div class="flex flex-col gap-2">
+                <div
+                  class="flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2"
+                >
+                  <span
+                    class="font-mono text-lg font-bold tracking-widest text-white"
+                    data-my-code
+                    >${this.myCode}</span
+                  >
+                  <copy-button
+                    compact
+                    .copyText=${this.myCode}
+                    .displayText=${translateText("private_lobby.my_code_copy")}
+                  ></copy-button>
+                </div>
+                <button
+                  type="button"
+                  class="tc-btn-primary h-12 text-base"
+                  @click=${this.openMyLobby}
+                >
+                  ${translateText("private_lobby.my_code_open")}
+                </button>
+              </div>`
+        }
+      </section>
+    `;
+  }
+
+  private createMyCode = async () => {
+    if (this.myCodeBusy) return;
+    this.myCodeBusy = true;
+    try {
+      const { lobby } = await createLobby();
+      if (!GAME_ID_REGEX.test(lobby.gameID)) {
+        throw new Error(`Invalid lobby ID format: ${lobby.gameID}`);
+      }
+      this.myCode = lobby.gameID;
+      try {
+        sessionStorage.setItem(MY_CODE_KEY, lobby.gameID);
+      } catch {
+        // Storage can be blocked; the code still works for this view.
+      }
+    } catch (error) {
+      console.warn("Couldn't create a private lobby code", error);
+      this.showMessage(translateText("private_lobby.my_code_error"), "red");
+    } finally {
+      this.myCodeBusy = false;
+    }
+  };
+
+  /** Opens the player's own lobby as its host (the server made them its creator). */
+  private openMyLobby = () => {
+    const code = this.myCode;
+    if (code === null) return;
+    whenModalLoaded("host-lobby-modal", () =>
+      (
+        document.querySelector("host-lobby-modal") as HTMLElement & {
+          open(args?: Record<string, unknown>): void;
+        }
+      )?.open({ existingLobbyId: code }),
+    );
+  };
+
+  /** Brings back this tab's code, unless its lobby has closed since. */
+  private async restoreMyCode(): Promise<void> {
+    let saved: string | null = null;
+    try {
+      saved = sessionStorage.getItem(MY_CODE_KEY);
+    } catch {
+      return;
+    }
+    if (saved === null || !GAME_ID_REGEX.test(saved)) {
+      this.myCode = null;
+      return;
+    }
+    if (await this.lobbyStillOpen(saved)) {
+      this.myCode = saved;
+      return;
+    }
+    this.myCode = null;
+    try {
+      sessionStorage.removeItem(MY_CODE_KEY);
+    } catch {
+      // Nothing to clean up then.
+    }
+  }
+
+  private async lobbyStillOpen(lobbyId: string): Promise<boolean> {
+    try {
+      const url = `${ClientEnv.gameHttpBase(lobbyId)}/${ClientEnv.gameWorkerPath(lobbyId)}/api/game/${lobbyId}/exists`;
+      const response = await fetch(url);
+      if (!response.ok) return false;
+      const info = (await response.json()) as { exists?: boolean };
+      return info.exists === true;
+    } catch {
+      return false;
+    }
   }
 
   private renderHostedLobbies() {
@@ -536,6 +680,7 @@ export class JoinLobbyModal extends BaseModal {
     this.leaveLobbyOnClose = true;
     this.hostedLobbiesLoaded = false;
     void this.hostedLobbySocket.start();
+    void this.restoreMyCode();
     const lobbyId = typeof args?.lobbyId === "string" ? args.lobbyId : "";
     const lobbyInfo = args?.lobbyInfo as GameInfo | PublicGameInfo | undefined;
     if (lobbyId) {
