@@ -7,7 +7,7 @@ import { PokiSDK } from "../../src/client/poki/PokiSDK";
 
 // This build ships without ads or anything to buy. These pin that down at
 // the places a player would otherwise meet them.
-describe("TerraClash build flags", () => {
+describe("Conquerra build flags", () => {
   it("ships with ads and monetization off", () => {
     expect(ADS_ENABLED).toBe(false);
     expect(MONETIZATION_ENABLED).toBe(false);

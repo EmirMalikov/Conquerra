@@ -17,9 +17,9 @@ import { ConstructionExecution } from "@openfront/engine/execution/ConstructionE
 import { Game, Player } from "@openfront/engine/game/Game";
 import { setup } from "../util/Setup";
 
-// TerraClash's balance changes, pinned to the numbers in the fork's
+// Conquerra's balance changes, pinned to the numbers in the fork's
 // "before -> after" table so a later edit to one of them is deliberate.
-describe("TerraClash balance", () => {
+describe("Conquerra balance", () => {
   let game: Game;
   let human: Player;
   let bot: Player;

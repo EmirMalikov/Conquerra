@@ -62,7 +62,7 @@ const LARGE_TERRITORY_STEEPNESS = 2.5;
 const LARGE_ATTACKER_DEPTH = 0.7;
 const LARGE_DEFENDER_DEPTH = 0.3;
 const BOT_DEFENDER_LOSS_MULT = 0.7;
-// TerraClash balance (see the economy table in the fork notes): buildings
+// Conquerra balance (see the economy table in the fork notes): buildings
 // and the first nukes are cheaper, and passive gold income is higher, so
 // the early game reaches its first city, port and factory sooner.
 /** Passive gold per tick for players and nations (upstream: 100). */

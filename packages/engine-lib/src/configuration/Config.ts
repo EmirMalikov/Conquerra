@@ -74,7 +74,7 @@ const DOOMSDAY_CLOCK_DEFAULTS = {
 const PERCENT_TILES_OWNED_TO_WIN = 80;
 
 /**
- * TerraClash balance: troops regrow 15% faster than upstream, so a
+ * Conquerra balance: troops regrow 15% faster than upstream, so a
  * player is back on the attack sooner. Applies to every player type, so
  * the difficulty scaling between humans, nations and bots is unchanged.
  */

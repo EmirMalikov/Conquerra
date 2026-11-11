@@ -1,5 +1,5 @@
 /**
- * What this build ships with. TerraClash has no ads and nothing to buy: the
+ * What this build ships with. Conquerra has no ads and nothing to buy: the
  * upstream ad stack (Playwire/RAMP, Admiral, Google Ad Manager), the portal
  * ad breaks (Poki, CrazyGames) and the store/checkout code are still in the
  * tree, but these flags keep every one of them from running. A platform that

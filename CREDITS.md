@@ -5,9 +5,9 @@
 OpenFront is licensed under AGPL-3.0.  
 See [Contributors](https://github.com/openfrontio/OpenFrontIO/graphs/contributors) for code contributors.
 
-## TerraClash fork
+## Conquerra fork
 
-TerraClash is a modified version of OpenFront (AGPL-3.0). The OpenFront logo,
+Conquerra is a modified version of OpenFront (AGPL-3.0). The OpenFront logo,
 font, images and music in `proprietary/` are not used in this build.
 
 - **Fredoka** font: © The Fredoka Project Authors, [SIL Open Font License 1.1](resources/fonts/Fredoka-OFL.txt) ([source](https://github.com/google/fonts/tree/main/ofl/fredoka)).
