@@ -531,46 +531,44 @@
     <!-- Game components -->
     <div id="app"></div>
 
-    <!-- Bottom HUD: <sm=column, sm..lg=2col (HUD left | events right), lg+=3col grid centered -->
+    <!-- Bottom HUD: one dark bar across the bottom (who / troops / attack
+         share / gold | build slots 1-0). Events and chat sit above its left
+         end, the tutorial panel above its middle. -->
     <div
-      class="fixed bottom-0 left-0 w-full z-[200] flex flex-col pointer-events-none sm:flex-row sm:items-end lg:grid lg:grid-cols-[1fr_500px_1fr] lg:items-end min-[1200px]:px-4"
+      class="fixed bottom-0 left-0 w-full z-[200] flex flex-col gap-2 pointer-events-none lg:px-4 lg:pb-3"
       style="
         padding-bottom: env(safe-area-inset-bottom);
         padding-left: env(safe-area-inset-left);
         padding-right: env(safe-area-inset-right);
       "
     >
-      <!-- HUD: <sm contents (children join outer flex), sm+ flex-col 460px, lg+ col-2 -->
       <div
-        class="contents sm:flex sm:flex-col sm:pointer-events-none w-full sm:w-[500px] lg:col-start-2 sm:z-10"
+        class="flex flex-col gap-2 pointer-events-none sm:flex-row sm:items-end sm:justify-between"
       >
-        <attacks-display
-          class="w-full pointer-events-auto order-1 sm:order-none"
-        ></attacks-display>
-        <tutorial-panel
-          class="hidden w-full order-3 sm:order-none"
-        ></tutorial-panel>
         <div
-          class="pointer-events-auto bg-gray-800/92 backdrop-blur-sm sm:rounded-tr-lg lg:rounded-t-lg min-[1200px]:rounded-lg shadow-lg order-3 sm:order-none z-10"
+          class="flex flex-col pointer-events-none items-start w-full sm:w-auto sm:max-w-[min(32rem,45vw)]"
         >
-          <control-panel class="w-full"></control-panel>
-          <unit-display class="block w-full"></unit-display>
+          <chat-display
+            class="w-full sm:w-auto pointer-events-auto"
+          ></chat-display>
+          <events-display
+            class="w-full sm:w-auto pointer-events-auto"
+          ></events-display>
+          <actionable-events
+            class="w-full sm:w-auto pointer-events-auto"
+          ></actionable-events>
         </div>
+        <tutorial-panel
+          class="hidden w-full sm:w-[500px] sm:mx-auto pointer-events-auto"
+        ></tutorial-panel>
+        <div class="hidden sm:block sm:flex-1"></div>
       </div>
-
-      <!-- events+chat: <sm between attacks and control (order-2), sm+ right side, lg+ col-3 -->
       <div
-        class="flex flex-col pointer-events-none items-end order-2 sm:order-none sm:flex-1 lg:col-start-3 lg:self-end lg:justify-end"
+        class="tc-hud-bar pointer-events-auto mx-auto flex w-full flex-col lg:w-auto lg:max-w-full lg:flex-row lg:items-center lg:gap-3 lg:px-3 lg:py-2"
       >
-        <chat-display
-          class="w-full sm:w-auto pointer-events-auto"
-        ></chat-display>
-        <events-display
-          class="w-full sm:w-auto pointer-events-auto"
-        ></events-display>
-        <actionable-events
-          class="w-full sm:w-auto pointer-events-auto"
-        ></actionable-events>
+        <control-panel class="w-full lg:w-auto"></control-panel>
+        <div class="hidden lg:block w-px self-stretch bg-white/10"></div>
+        <unit-display class="block w-full lg:w-auto"></unit-display>
       </div>
     </div>
 
@@ -592,15 +590,23 @@
         class="lg:col-start-1 lg:justify-self-start"
       ></game-left-sidebar>
       <player-info-overlay
-        class="lg:col-start-2 lg:min-w-0"
+        class="lg:col-start-2 lg:min-w-0 lg:mt-[6.5rem]"
       ></player-info-overlay>
       <div
         class="flex flex-col items-end gap-2 max-lg:fixed max-lg:top-0 max-lg:right-0 max-lg:z-1000 lg:col-start-3 lg:justify-self-end lg:pointer-events-auto"
       >
         <game-right-sidebar></game-right-sidebar>
         <replay-panel></replay-panel>
+        <world-rank-pill class="mr-3 lg:mr-0"></world-rank-pill>
+        <attacks-display
+          class="w-[min(20rem,92vw)] mr-3 lg:mr-0 pointer-events-auto"
+        ></attacks-display>
       </div>
     </div>
+    <!-- Top centre: match clock and the World control bar. -->
+    <world-control-panel
+      class="fixed top-3 left-1/2 -translate-x-1/2 z-[1001] pointer-events-none hidden md:block"
+    ></world-control-panel>
     <settings-modal></settings-modal>
     <!-- The in-game settings modal: the same component as #page-settings, but
          non-inline, and mounted out here because the page's copy sits in a

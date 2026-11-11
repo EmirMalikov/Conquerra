@@ -220,7 +220,7 @@ export class AttacksDisplay extends LitElement implements Controller {
     return this.incomingAttacks.map(
       (attack) => html`
         <div
-          class="flex items-center gap-0.5 w-full bg-gray-800/92 backdrop-blur-sm sm:rounded-lg px-1.5 py-0.5 overflow-hidden"
+          class="flex items-center gap-0.5 w-full bg-white/[0.05] border border-white/10 rounded-lg px-2 py-1 overflow-hidden"
         >
           ${this.renderButton({
             content: html`<span class="inline-flex items-center"
@@ -271,7 +271,7 @@ export class AttacksDisplay extends LitElement implements Controller {
     return this.outgoingAttacks.map(
       (attack) => html`
         <div
-          class="flex items-center gap-0.5 w-full bg-gray-800/92 backdrop-blur-sm sm:rounded-lg px-1.5 py-0.5 overflow-hidden"
+          class="flex items-center gap-0.5 w-full bg-white/[0.05] border border-white/10 rounded-lg px-2 py-1 overflow-hidden"
         >
           ${this.renderButton({
             content: html`<span class="inline-flex items-center"
@@ -314,7 +314,7 @@ export class AttacksDisplay extends LitElement implements Controller {
     return this.outgoingLandAttacks.map(
       (landAttack) => html`
         <div
-          class="flex items-center gap-0.5 w-full bg-gray-800/92 backdrop-blur-sm sm:rounded-lg px-1.5 py-0.5 overflow-hidden"
+          class="flex items-center gap-0.5 w-full bg-white/[0.05] border border-white/10 rounded-lg px-2 py-1 overflow-hidden"
         >
           ${this.renderButton({
             content: html`<span class="inline-flex items-center"
@@ -390,7 +390,7 @@ export class AttacksDisplay extends LitElement implements Controller {
     return this.outgoingBoats.map(
       (boat) => html`
         <div
-          class="flex items-center gap-0.5 w-full bg-gray-800/92 backdrop-blur-sm sm:rounded-lg px-1.5 py-0.5 overflow-hidden"
+          class="flex items-center gap-0.5 w-full bg-white/[0.05] border border-white/10 rounded-lg px-2 py-1 overflow-hidden"
         >
           ${this.renderButton({
             content: html`${this.renderBoatIcon(boat)}
@@ -431,7 +431,7 @@ export class AttacksDisplay extends LitElement implements Controller {
     return this.incomingBoats.map(
       (boat) => html`
         <div
-          class="flex items-center gap-0.5 w-full bg-gray-800/92 backdrop-blur-sm sm:rounded-lg px-1.5 py-0.5 overflow-hidden"
+          class="flex items-center gap-0.5 w-full bg-white/[0.05] border border-white/10 rounded-lg px-2 py-1 overflow-hidden"
         >
           ${this.renderButton({
             content: html`${this.renderBoatIcon(boat)}
@@ -470,13 +470,34 @@ export class AttacksDisplay extends LitElement implements Controller {
       return html``;
     }
 
+    const count =
+      this.outgoingAttacks.length +
+      this.outgoingLandAttacks.length +
+      this.outgoingBoats.length +
+      this.incomingAttacks.length +
+      this.incomingBoats.length;
     return html`
       <div
-        class="w-full mb-1 mt-1 sm:mt-0 pointer-events-auto grid grid-cols-2 gap-1 text-white text-sm lg:text-base max-h-[7rem] overflow-y-auto"
+        class="tc-panel w-full pointer-events-auto flex flex-col gap-1.5 p-2.5 text-white text-sm"
       >
-        ${this.renderOutgoingAttacks()} ${this.renderOutgoingLandAttacks()}
-        ${this.renderBoats()} ${this.renderIncomingAttacks()}
-        ${this.renderIncomingBoats()}
+        <div class="flex items-center justify-between px-1">
+          <span class="tc-label flex items-center gap-1.5 text-[0.75rem]">
+            <img
+              src="${swordIcon}"
+              class="h-3.5 w-3.5"
+              alt=""
+              aria-hidden="true"
+              style="filter: brightness(0) saturate(100%) invert(76%) sepia(60%) saturate(800%) hue-rotate(350deg)"
+            />
+            ${translateText("hud.attacks")}
+          </span>
+          <span class="text-xs text-white/55 tabular-nums">${count}</span>
+        </div>
+        <div class="flex flex-col gap-1 max-h-[14rem] overflow-y-auto">
+          ${this.renderIncomingAttacks()} ${this.renderIncomingBoats()}
+          ${this.renderOutgoingAttacks()} ${this.renderOutgoingLandAttacks()}
+          ${this.renderBoats()}
+        </div>
       </div>
     `;
   }

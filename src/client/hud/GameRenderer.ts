@@ -49,6 +49,7 @@ import { SpawnTimer } from "./layers/SpawnTimer";
 import { TutorialPanel } from "./layers/TutorialPanel";
 import { UnitDisplay } from "./layers/UnitDisplay";
 import { WinModal } from "./layers/WinModal";
+import { WorldControlPanel, WorldRankPill } from "./layers/WorldControlPanel";
 import { loadAllSprites } from "./SpriteLoader";
 
 export function createRenderer(
@@ -305,6 +306,20 @@ export function createRenderer(
   immunityTimer.game = game;
   immunityTimer.eventBus = eventBus;
 
+  const worldControl = document.querySelector(
+    "world-control-panel",
+  ) as WorldControlPanel;
+  if (!(worldControl instanceof WorldControlPanel)) {
+    console.error("world control panel not found");
+  }
+  worldControl.game = game;
+
+  const rankPill = document.querySelector("world-rank-pill") as WorldRankPill;
+  if (!(rankPill instanceof WorldRankPill)) {
+    console.error("world rank pill not found");
+  }
+  rankPill.game = game;
+
   const inGamePromo = document.querySelector("in-game-promo") as InGamePromo;
   if (!(inGamePromo instanceof InGamePromo)) {
     console.error("in-game promo not found");
@@ -367,6 +382,8 @@ export function createRenderer(
     ),
     spawnTimer,
     immunityTimer,
+    worldControl,
+    rankPill,
     gameLeftSidebar,
     unitDisplay,
     gameRightSidebar,

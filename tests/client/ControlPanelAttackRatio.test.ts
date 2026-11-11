@@ -47,6 +47,38 @@ describe("control-panel attack ratio", () => {
     expect(uiState.attackRatio).toBeCloseTo(0.55);
   });
 
+  it("sets the attack share from the preset chips", async () => {
+    panel.game = {
+      inSpawnPhase: () => false,
+      myPlayer: () => ({
+        isAlive: () => true,
+        troops: () => 100_000,
+        displayName: () => "Me",
+        territoryColor: () => ({ toRgbString: () => "rgb(1, 2, 3)" }),
+      }),
+    } as unknown as GameView;
+    panel.setVisibile(true);
+    await (panel as any).updateComplete;
+
+    const chips = Array.from(
+      panel.querySelectorAll<HTMLButtonElement>(".tc-ratio-chip"),
+    );
+    expect(chips.map((c) => c.textContent?.trim())).toEqual([
+      "10%",
+      "25%",
+      "35%",
+      "50%",
+      "75%",
+    ]);
+    chips[2].click();
+    await (panel as any).updateComplete;
+
+    expect(uiState.attackRatio).toBeCloseTo(0.35);
+    expect(
+      panel.querySelector(".tc-ratio-chip.active")?.textContent?.trim(),
+    ).toBe("35%");
+  });
+
   it("stops listening once the panel is gone", () => {
     panel.remove();
 
@@ -58,7 +90,12 @@ describe("control-panel attack ratio", () => {
   it("renders the calculated troop count alongside percentage in mobile view", async () => {
     panel.game = {
       inSpawnPhase: () => false,
-      myPlayer: () => ({ isAlive: () => true, troops: () => 100_000 }),
+      myPlayer: () => ({
+        isAlive: () => true,
+        troops: () => 100_000,
+        displayName: () => "Me",
+        territoryColor: () => ({ toRgbString: () => "rgb(1, 2, 3)" }),
+      }),
     } as unknown as GameView;
 
     panel.setVisibile(true);
@@ -84,7 +121,12 @@ describe("control-panel attack ratio", () => {
 
     panel.game = {
       inSpawnPhase: () => false,
-      myPlayer: () => ({ isAlive: () => true, troops: () => 100_000 }),
+      myPlayer: () => ({
+        isAlive: () => true,
+        troops: () => 100_000,
+        displayName: () => "Me",
+        territoryColor: () => ({ toRgbString: () => "rgb(1, 2, 3)" }),
+      }),
     } as unknown as GameView;
     new UserSettings().setAttackRatio(0.5);
 
@@ -106,7 +148,12 @@ describe("control-panel attack ratio", () => {
 
     panel.game = {
       inSpawnPhase: () => false,
-      myPlayer: () => ({ isAlive: () => true, troops: () => 100_000 }),
+      myPlayer: () => ({
+        isAlive: () => true,
+        troops: () => 100_000,
+        displayName: () => "Me",
+        territoryColor: () => ({ toRgbString: () => "rgb(1, 2, 3)" }),
+      }),
     } as unknown as GameView;
     new UserSettings().setAttackRatio(0.5);
 
@@ -134,7 +181,12 @@ describe("control-panel attack ratio", () => {
   it("moves the slider when the radial menu forwards a tap to it", async () => {
     panel.game = {
       inSpawnPhase: () => false,
-      myPlayer: () => ({ isAlive: () => true, troops: () => 100_000 }),
+      myPlayer: () => ({
+        isAlive: () => true,
+        troops: () => 100_000,
+        displayName: () => "Me",
+        territoryColor: () => ({ toRgbString: () => "rgb(1, 2, 3)" }),
+      }),
     } as unknown as GameView;
     panel.setVisibile(true);
     await (panel as any).updateComplete;
@@ -157,7 +209,12 @@ describe("control-panel attack ratio", () => {
   it("leaves a real slider press to the browser", async () => {
     panel.game = {
       inSpawnPhase: () => false,
-      myPlayer: () => ({ isAlive: () => true, troops: () => 100_000 }),
+      myPlayer: () => ({
+        isAlive: () => true,
+        troops: () => 100_000,
+        displayName: () => "Me",
+        territoryColor: () => ({ toRgbString: () => "rgb(1, 2, 3)" }),
+      }),
     } as unknown as GameView;
     panel.setVisibile(true);
     await (panel as any).updateComplete;

@@ -409,6 +409,11 @@ export class UnitDisplay extends LitElement implements Controller {
     tooltip.style.left = `${left - rootBounds.left + tooltipBounds.width / 2}px`;
   }
 
+  /** Whether the player has the gold for one more of this unit. */
+  private canAfford(item: UnitType): boolean {
+    return this.cost(item) <= (this.game?.myPlayer()?.gold() ?? 0n);
+  }
+
   private cost(item: UnitType): Gold {
     for (const bu of this.playerBuildables ?? []) {
       if (bu.type === item) {
@@ -627,15 +632,9 @@ export class UnitDisplay extends LitElement implements Controller {
           this.startPeek(event, unitType, structureKey, hotkey)}
       >
         <div
-          class="${
-            this.canBuild(unitType) ? "" : "opacity-40"
-          } border border-slate-500 rounded-sm max-lg:h-7.5 w-full px-1 pb-0.5 flex items-center justify-center gap-0.5 cursor-pointer lg:px-0.5 lg:justify-start landscape:px-0.5
-             ${
-            selected
-              ? "pointer-fine:hover:bg-gray-400/10"
-              : "pointer-fine:hover:bg-gray-800"
-          }
-             rounded-sm text-white ${selected ? "bg-slate-400/20" : ""}
+          class="tc-slot ${this.canBuild(unitType) ? "" : "tc-slot-off"} ${
+            selected ? "tc-slot-on" : ""
+          } relative max-lg:h-7.5 w-full px-1 flex items-center justify-center cursor-pointer text-white lg:h-[3.6rem] lg:w-[3.4rem] lg:flex-col lg:px-0
              ${this.tutorialHighlight === unitType ? "tutorial-highlight" : ""}"
           @click=${(event: Event) => {
             const item = (event.currentTarget as HTMLElement).closest(
@@ -692,28 +691,32 @@ export class UnitDisplay extends LitElement implements Controller {
           ${
             hotkey
               ? html`<div
-                  class="unit-display-hotkey ml-0.5 text-[10px] relative -top-1 text-gray-400"
+                  class="unit-display-hotkey absolute left-1 top-0.5 text-[10px] font-bold leading-none text-white/45"
                 >
                   ${displayHotkey}
                 </div>`
               : nothing
           }
-          <div
-            class="flex flex-col items-center gap-0 pt-0.5 lg:flex-row lg:gap-0.5 max-lg:landscape:flex-row max-lg:landscape:gap-0.5"
+          ${
+            number
+              ? html`<span
+                  class="absolute right-1 top-0.5 hidden lg:inline text-[10px] font-bold leading-none text-[var(--tc-cyan)]"
+                  >${renderNumber(number)}</span
+                >`
+              : nothing
+          }
+          <img
+            src=${icon}
+            alt=${translateText("unit_type." + structureKey)}
+            class="align-middle size-6 lg:mt-1.5 max-lg:landscape:size-5"
+          />
+          <span
+            class="hidden lg:block mt-0.5 text-[11px] font-bold leading-none tabular-nums ${
+              this.canAfford(unitType) ? "text-amber-300" : "text-red-400"
+            }"
+            translate="no"
+            >${renderNumber(this.cost(unitType))}</span
           >
-            <img
-              src=${icon}
-              alt=${translateText("unit_type." + structureKey)}
-              class="align-middle size-6 lg:size-5 max-lg:landscape:size-5"
-            />
-            ${
-              number !== null
-                ? html`<span class="hidden lg:inline text-xs leading-none"
-                    >${renderNumber(number)}</span
-                  >`
-                : null
-            }
-          </div>
         </div>
       </div>
     `;

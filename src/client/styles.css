@@ -1050,3 +1050,99 @@ unit-display .tutorial-highlight::after {
   color: #eaf1ff;
   text-shadow: 0 2px 6px rgb(0 0 0 / 0.6);
 }
+
+/* In-game bottom bar: one dark glass strip holding the control panel and the
+   build slots. Square on phones, where it spans the screen edge to edge. */
+.tc-hud-bar {
+  background: var(--tc-panel-strong);
+  border-top: 1px solid var(--tc-panel-border);
+  box-shadow: 0 -6px 24px rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(8px);
+  color: #fff;
+}
+@media (min-width: 1024px) {
+  .tc-hud-bar {
+    border: 1px solid var(--tc-panel-border);
+    border-radius: 1.1rem;
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.45);
+  }
+  .tc-hud-bar .unit-display-root {
+    border-top: 0;
+  }
+}
+
+/* Attack-share preset chips (10/25/35/50/75%). */
+.tc-ratio-chip {
+  min-width: 2.6rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: rgb(255 255 255 / 0.75);
+  background: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+.tc-ratio-chip:hover {
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+}
+.tc-ratio-chip.active {
+  color: var(--tc-accent-ink);
+  background: var(--tc-accent);
+  border-color: var(--tc-accent);
+}
+
+/* Build slots in the bottom bar. */
+.tc-slot {
+  border-radius: 0.6rem;
+  background: rgb(255 255 255 / 0.05);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    transform 0.12s ease;
+}
+@media (pointer: fine) {
+  .tc-slot:hover {
+    background: rgb(255 255 255 / 0.12);
+    transform: translateY(-1px);
+  }
+}
+.tc-slot-off img {
+  opacity: 0.45;
+}
+.tc-slot-on {
+  border-color: var(--tc-accent);
+  background: rgb(255 182 39 / 0.16);
+  box-shadow: 0 0 0 1px var(--tc-accent);
+}
+
+/* In-game top-right icons: the same round buttons as the menu. */
+.tc-icon-row > div.cursor-pointer,
+.tc-icon-row > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 9999px;
+  background: rgb(10 16 32 / 0.85);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.35);
+}
+.tc-icon-row > div.cursor-pointer:hover,
+.tc-icon-row > button:hover {
+  background: rgb(30 42 70 / 0.95);
+}
+.tc-timer-pill {
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  background: rgb(10 16 32 / 0.85);
+  font-family: var(--font-display);
+  font-weight: 700;
+}

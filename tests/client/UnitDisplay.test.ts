@@ -162,10 +162,9 @@ describe("mobile UnitDisplay layout", () => {
       await display.updateComplete;
       const cityButton = display.querySelector(".unit-display-grid > * > div");
 
+      // The hover style lives in .tc-slot, behind @media (pointer: fine).
       expect(cityButton?.classList.contains("hover:bg-gray-800")).toBe(false);
-      expect(
-        cityButton?.classList.contains("pointer-fine:hover:bg-gray-800"),
-      ).toBe(true);
+      expect(cityButton?.classList.contains("tc-slot")).toBe(true);
     } finally {
       display.remove();
     }

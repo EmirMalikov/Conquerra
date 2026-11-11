@@ -40,6 +40,8 @@ const HUD_TAGS = [
   "alert-frame",
   "spawn-timer",
   "immunity-timer",
+  "world-control-panel",
+  "world-rank-pill",
   "in-game-promo",
   "tutorial-panel",
   "onboarding-overlay",

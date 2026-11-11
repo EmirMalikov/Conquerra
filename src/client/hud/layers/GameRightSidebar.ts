@@ -394,14 +394,17 @@ export class GameRightSidebar extends LitElement implements Controller {
         }
       </style>
       <aside
-        class=${`w-fit flex flex-row items-center gap-2 sm:gap-3 py-2 px-2 sm:px-3 bg-gray-800/92 backdrop-blur-sm shadow-xs rounded-bl-lg transition-transform duration-300 ease-out transform text-white ${shouldFlashSidebar ? "game-end-timer-sidebar-flash" : ""} ${
+        class=${`tc-icon-row w-fit flex flex-row items-center gap-2 py-3 px-3 transition-transform duration-300 ease-out transform text-white ${shouldFlashSidebar ? "game-end-timer-sidebar-flash" : ""} ${
           this._isVisible ? "translate-x-0" : "translate-x-full"
         }`}
         @contextmenu=${(e: Event) => e.preventDefault()}
       >
         <!-- In-game time -->
-        <div data-game-timer class=${timerClass}>
-          ${this.secondsToHms(this.timer)}
+        <!-- From md up the world-control panel shows the clock. -->
+        <div class="tc-timer-pill md:sr-only">
+          <div data-game-timer class=${timerClass}>
+            ${this.secondsToHms(this.timer)}
+          </div>
         </div>
 
         <!-- Buttons -->
