@@ -1,12 +1,9 @@
+import { assetUrl } from "@openfront/shared/AssetUrls";
 import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
-import "./CosmeticBackground";
-import "./GameWordmark";
 import "./NavAccountMenu";
 import "./NavUtilityIcons";
-import "./NewsBox";
-import "./SteamWishlist";
-import "./StreamingNow";
+import { translateText } from "../Utils";
 
 @customElement("play-page")
 export class PlayPage extends LitElement {
@@ -58,7 +55,12 @@ export class PlayPage extends LitElement {
             <div
               class="col-start-2 flex items-center justify-center text-malibu-blue min-w-0"
             >
-              <game-wordmark size="sm"></game-wordmark>
+              <img
+                src=${assetUrl("images/GameEmblem.svg")}
+                alt=""
+                class="size-9"
+                draggable="false"
+              />
             </div>
 
             <!-- Right slot: bell, help, settings and the profile control. The menu is
@@ -73,54 +75,38 @@ export class PlayPage extends LitElement {
           </div>
         </div>
 
-        <!-- Top strip: news + identity on the left, Streaming Now on the right. The 2fr/1fr
-             split only exists while the panel is live (.streaming-live via has-[]) —
-             otherwise the left column takes the full row. -->
-        <div
-          class="group/strip w-full pb-4 lg:pb-0 sm:compact:pb-0 flex flex-col gap-4 sm:-mx-4 sm:w-[calc(100%+2rem)] lg:mx-0 lg:w-full lg:grid lg:grid-cols-1 lg:has-[.streaming-live]:grid-cols-[2fr_1fr] lg:gap-4 lg:items-stretch"
+        <!-- Mobile: spacer for the fixed top bar -->
+        <div class="lg:hidden h-[calc(env(safe-area-inset-top)+56px)]"></div>
+
+        <!-- Hero: the emblem, the giant 3D title and the spaced-out tagline. -->
+        <header
+          class="flex flex-col items-center gap-2 pt-4 pb-2 lg:pt-2 compact:pt-0 text-center select-none"
         >
-          <!-- Mobile: spacer for fixed top bar -->
-          <div
-            class="lg:hidden h-[calc(env(safe-area-inset-top)+56px)] -mb-4"
-          ></div>
-
-          <!-- Left column: news banner + identity row, stacked tight. -->
-          <div class="flex flex-col gap-2 min-w-0">
-            <!-- Off on compact screens (see styles.css), like Streaming Now. -->
-            <news-box class="compact:hidden"></news-box>
-
-            <!-- Identity row: username over the currently selected cosmetic background. -->
-            <div
-              class="relative bg-surface border-y border-white/10 overflow-visible flex items-center sm:min-h-[60px] sm:compact:min-h-[45px] sm:flex-1 sm:z-20 sm:border-y-0 sm:rounded-xl"
+          <img
+            src=${assetUrl("images/GameEmblem.svg")}
+            alt=""
+            draggable="false"
+            class="size-14 lg:size-16 compact:size-10 drop-shadow-[0_6px_10px_rgb(0_0_0/0.5)]"
+          />
+          <h1
+            class="tc-title text-[clamp(2.4rem,12vw,6rem)] compact:text-[clamp(2.4rem,9vw,4rem)]"
+          >
+            ${translateText("main.game_name")}
+          </h1>
+          <div class="flex w-full max-w-xl items-center gap-4 px-4">
+            <span
+              class="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--tc-accent)]"
+            ></span>
+            <span class="tc-subtitle text-xs sm:text-sm whitespace-nowrap"
+              >${translateText("main.subtitle")}</span
             >
-              <!-- Selected skin/pattern fills the bubble like the player's territory in game. -->
-              <cosmetic-background
-                class="absolute inset-0 z-0 overflow-hidden sm:rounded-xl pointer-events-none"
-              ></cosmetic-background>
-              <div
-                class="relative z-10 flex h-full w-full min-w-0 items-center bg-surface/80 p-1 sm:rounded-xl"
-              >
-                <username-input
-                  class="flex-1 min-w-0 h-10 sm:h-[50px] sm:compact:h-[38px]"
-                ></username-input>
-              </div>
-            </div>
+            <span
+              class="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--tc-accent)]"
+            ></span>
           </div>
-
-          <!-- Right column: Streaming Now (desktop only), stretched to the left column's
-               full height so the top strip has no dead space. -->
-          <streaming-now
-            class="hidden lg:flex lg:h-full lg:flex-col w-full min-w-0"
-          ></streaming-now>
-        </div>
+        </header>
 
         <game-mode-selector></game-mode-selector>
-
-        <!-- Desktop gets the compact footer button instead. -->
-        <steam-wishlist
-          campaign="home_mobile"
-          class="block px-2 pb-4 lg:hidden"
-        ></steam-wishlist>
       </div>
     `;
   }

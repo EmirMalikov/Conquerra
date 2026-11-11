@@ -10,7 +10,7 @@ See [Contributors](https://github.com/openfrontio/OpenFrontIO/graphs/contributor
 TerraClash is a modified version of OpenFront (AGPL-3.0). The OpenFront logo,
 font, images and music in `proprietary/` are not used in this build.
 
-- **Fredoka** font: Â© The Fredoka Project Authors, [SIL Open Font License 1.1](resources/fonts/Fredoka-OFL.txt) ([source](https://github.com/google/fonts/tree/main/ofl/fredoka)).
+- **Fredoka** font: © The Fredoka Project Authors, [SIL Open Font License 1.1](resources/fonts/Fredoka-OFL.txt) ([source](https://github.com/google/fonts/tree/main/ofl/fredoka)).
 - **Game emblem** (`resources/images/GameEmblem.svg`): made for this fork, CC BY-SA 4.0.
 
 ## Map Data

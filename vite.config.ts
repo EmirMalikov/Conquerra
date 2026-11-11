@@ -273,7 +273,7 @@ export default defineConfig(({ mode }) => {
       cdnBase,
     ),
     backgroundImageUrl: buildAssetUrl(
-      "images/background.webp",
+      "maps/world/w2kland.webp",
       assetManifest,
       cdnBase,
     ),

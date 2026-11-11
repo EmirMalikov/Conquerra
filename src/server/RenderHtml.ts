@@ -109,7 +109,7 @@ export async function renderHtmlContent(
       cdnBase,
     ),
     backgroundImageUrl: buildAssetUrl(
-      "images/background.webp",
+      "maps/world/w2kland.webp",
       assetManifest,
       cdnBase,
     ),

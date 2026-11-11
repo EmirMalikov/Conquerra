@@ -159,7 +159,9 @@ export class NavUtilityIcons extends LitElement {
   };
 
   private buttonClass(): string {
-    const box = this.size === "mobile" ? "w-9 h-9" : "w-10 h-10";
+    if (this.size !== "mobile")
+      return "nav-menu-item tc-round-btn cursor-pointer";
+    const box = "w-9 h-9";
     return (
       `nav-menu-item flex items-center justify-center ${box} rounded-full ` +
       "text-white/70 hover:text-malibu-blue cursor-pointer transition-colors " +
@@ -362,7 +364,9 @@ export class NavUtilityIcons extends LitElement {
   render(): TemplateResult {
     const currentPage = window.currentPageId;
     return html`
-      <div class="flex items-center gap-1">
+      <div
+        class="flex items-center ${this.size === "mobile" ? "gap-1" : "gap-2"}"
+      >
         <div class="relative">
           <button
             class="${this.buttonClass()} ${

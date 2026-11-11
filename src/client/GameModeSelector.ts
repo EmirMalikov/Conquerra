@@ -8,9 +8,8 @@ import { getDesktopSessionState } from "./Auth";
 import "./components/IOSAddToHomeScreenBanner";
 import {
   canJoinTrustedLobby,
-  lobbyCard,
+  lobbyRow,
   mapAspectRatios,
-  trustLockIcon,
   trustRequiredDialog,
   viewerIsSignedIn,
   viewerIsTrusted,
@@ -45,7 +44,6 @@ import { UsernameInput } from "./UsernameInput";
 import {
   calculateServerTimeOffset,
   getGameModeLabel,
-  getGamesPlayed,
   getSecondsUntilServerTimestamp,
   reloadForUpdate,
   renderDuration,
@@ -54,17 +52,7 @@ import {
 } from "./Utils";
 import { isReplayShellHost } from "./VersionedReplay";
 
-const PRIMARY_ACTION =
-  "bg-malibu-blue hover:bg-aquarius active:bg-malibu-blue/80 hover:scale-y-105 hover:scale-x-[1.01]";
-const SECONDARY_ACTION =
-  "bg-surface hover:brightness-[1.08] active:brightness-[0.95] hover:scale-105 hover:shadow-[var(--shadow-action-card-hover)]";
 const DISABLED = "opacity-50 cursor-not-allowed pointer-events-none";
-/** Tutorial card: the panel's gold, dark text for contrast. */
-const TUTORIAL_ACTION =
-  "bg-cyber-yellow hover:bg-yellow-300 active:bg-cyber-yellow/80 !text-gray-900 hover:scale-y-105 hover:scale-x-[1.01]";
-
-/** The Tutorial card shows beside Solo until the player has played this many games. */
-const TUTORIAL_CARD_MAX_GAMES = 5;
 
 /**
  * THE REACHABILITY RULE (OPE-439). Stated once, here; every other call site
@@ -387,7 +375,12 @@ export class GameModeSelector extends LitElement {
     const usernameInput = document.querySelector(
       "username-input",
     ) as UsernameInput | null;
-    return usernameInput ? usernameInput.canPlay() : true;
+    // The input now sits inside this panel, so it can exist before its class
+    // is defined (it upgrades once UsernameInput loads): only ask it when the
+    // method is there.
+    return typeof usernameInput?.canPlay === "function"
+      ? usernameInput.canPlay()
+      : true;
   }
 
   connectedCallback() {
@@ -648,139 +641,108 @@ export class GameModeSelector extends LitElement {
   }
 
   render() {
-    const ffa = this.lobbies?.games?.["ffa"]?.[0];
-    const teams = this.lobbies?.games?.["team"]?.[0];
-    const special = this.lobbies?.games?.["special"]?.[0];
-    // A lone secondary card takes both of the column's card rows.
-    const cardRows =
-      teams && special
-        ? { special: "sm:row-start-2", teams: "sm:row-start-3" }
-        : {
-            special: "sm:row-start-2 sm:row-span-2",
-            teams: "sm:row-start-2 sm:row-span-2",
-          };
+    const featured = (["ffa", "team", "special"] as const)
+      .map((type) => this.lobbies?.games?.[type]?.[0])
+      .filter((lobby): lobby is PublicGameInfo => !!lobby?.gameConfig);
 
-    // DOM is in phone order; sm+ places the same elements onto a grid and
-    // reading-flow keeps focus order following the rows (Chromium only).
-    // On compact screens (styles.css) Solo/Tutorial sit under the hero card only,
-    // and the lobby column runs down beside them, so its two cards get that height.
-    // There the grid also pulls up over the gap after the banner's row when it's empty.
     return html`
       <div
-        class="flex flex-col gap-4 sm:compact:gap-3 sm:compact:has-[>ios-add-to-home-screen-banner:empty]:-mt-3 w-full px-4 pb-4 mx-auto sm:px-0 sm:pb-0 sm:grid sm:grid-cols-[2fr_1fr] sm:grid-rows-[auto_min(24rem,40vh)_auto_auto] sm:compact:grid-rows-[auto_minmax(min(24rem,40vh),auto)_3.5rem_auto] desktop:sm:grid-rows-[auto_40vh_auto_auto] sm:[reading-flow:grid-rows]"
+        class="relative mx-auto flex w-full max-w-[44rem] flex-col gap-4 px-3 pb-6 sm:px-0 lg:pb-2"
       >
         <ios-add-to-home-screen-banner
-          class="no-game-portal [&:empty]:hidden sm:col-span-2 sm:row-start-1"
+          class="no-game-portal [&:empty]:hidden"
         ></ios-add-to-home-screen-banner>
 
+        <!-- Party: on wide screens it floats at the left edge of the page,
+             like a side card; below that it stacks under the main panel. -->
         <div
-          class="flex gap-4 sm:compact:gap-3 h-14 sm:col-span-2 sm:row-start-3 sm:compact:col-span-1!"
+          class="order-2 xl:order-none xl:fixed xl:left-6 xl:top-1/2 xl:-translate-y-1/2 xl:w-72 xl:z-10"
         >
-          <div class="flex-[2]">
-            ${this.renderSmallActionCard(
-              translateText("main.solo"),
-              this.openSinglePlayerModal,
-              PRIMARY_ACTION,
-            )}
-          </div>
-          ${
-            getGamesPlayed() < TUTORIAL_CARD_MAX_GAMES
-              ? html`<div class="flex-1">
-                  ${this.renderSmallActionCard(
-                    translateText("main.tutorial"),
-                    this.startTutorial,
-                    TUTORIAL_ACTION,
-                  )}
-                </div>`
-              : nothing
-          }
-        </div>
-        <div
-          class="grid grid-cols-3 gap-4 sm:compact:gap-3 h-14 sm:col-span-2 sm:row-start-4"
-        >
-          ${this.renderSmallActionCard(
-            translateText("main.create"),
-            this.openHostLobby,
-            SECONDARY_ACTION,
-            undefined,
-            true,
-          )}
-          ${this.renderSmallActionCard(
-            translateText("mode_selector.ranked_title"),
-            this.openRankedMenu,
-            SECONDARY_ACTION,
-            undefined,
-            true,
-            // Ranked admits trusted accounts only. A trusted viewer gets the
-            // green open lock; anyone else meets the red locks and the trust
-            // popup inside the ranked modal. Small, so it clears the label on
-            // narrow (mobile) buttons.
-            this.viewerTrusted
-              ? trustLockIcon(true, {
-                  tooltipTitle: translateText(
-                    "mode_selector.ranked_trust_tooltip_title",
-                  ),
-                  position: "top-1 right-1",
-                  small: true,
-                })
-              : nothing,
-          )}
-          ${this.renderSmallActionCard(
-            translateText("main.join"),
-            this.openJoinLobby,
-            SECONDARY_ACTION,
-            this.hostedLobbyCount(),
-            true,
-          )}
+          ${this.renderPartyPanel()}
         </div>
 
-        <div class="min-w-0 sm:col-start-1 sm:row-start-2">
-          ${
-            ffa?.gameConfig
-              ? this.renderLobbyCard(ffa, getGameModeLabel(ffa.gameConfig))
-              : this.offlineForLobbies()
-                ? this.renderLobbiesUnavailable()
-                : this.lobbies === null
-                  ? html`<div
-                      class="flex items-center justify-center h-44 sm:h-full"
-                      role="status"
-                      aria-label=${translateText("common.loading")}
-                    >
-                      <span
-                        class="size-24 rounded-full border-[6px] border-blue-500/30 border-t-blue-500 animate-spin"
-                      ></span>
-                    </div>`
-                  : html`<div
-                      class="h-44 sm:h-full rounded-2xl bg-surface"
-                    ></div>`
-          }
-        </div>
-
-        <!-- Always rendered: the heading is the only way into the lobby browser. -->
         <section
-          class="flex flex-col gap-4 sm:compact:gap-3 min-w-0 sm:grid sm:grid-rows-[auto_1fr_1fr] sm:row-start-2 sm:min-h-0 sm:[reading-flow:grid-rows] sm:col-start-2 sm:compact:row-end-4 sm:compact:grid-rows-[auto_minmax(7.5rem,1fr)_minmax(7.5rem,1fr)]"
+          class="tc-panel order-1 xl:order-none flex flex-col gap-4 p-4 sm:p-5"
         >
-          ${
-            teams
-              ? html`<div class="min-w-0 sm:min-h-0 ${cardRows.teams}">
-                  ${this.renderLobbyCard(
-                    teams,
-                    getGameModeLabel(teams.gameConfig!),
-                  )}
-                </div>`
-              : nothing
-          }
-          ${
-            special
-              ? html`<div class="min-w-0 sm:min-h-0 ${cardRows.special}">
-                  ${this.renderLobbyCard(
-                    special,
-                    getGameModeLabel(special.gameConfig!),
-                  )}
-                </div>`
-              : nothing
-          }
+          <div class="flex flex-col gap-2">
+            <p class="text-center text-sm font-medium text-white/80">
+              ${translateText("main.welcome")}
+            </p>
+            <username-input
+              class="relative h-11 w-full min-w-0"
+            ></username-input>
+          </div>
+
+          <div class="flex items-stretch gap-3">
+            <button
+              @click=${this.openSinglePlayerModal}
+              ?disabled=${!this.inputValid}
+              class="tc-btn-primary relative flex h-16 flex-1 items-center justify-center gap-3 text-xl sm:text-2xl ${
+                this.inputValid ? "" : DISABLED
+              }"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                class="absolute left-5 size-6"
+                aria-hidden="true"
+              >
+                <path d="M7 4.5v15l12-7.5z" fill="currentColor" />
+              </svg>
+              ${translateText("main.play_solo")}
+            </button>
+            <button
+              @click=${this.startTutorial}
+              ?disabled=${!this.inputValid}
+              class="tc-btn-ghost flex size-16 shrink-0 items-center justify-center ${
+                this.inputValid ? "" : DISABLED
+              }"
+              title=${translateText("main.tutorial")}
+              aria-label=${translateText("main.tutorial")}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                class="size-7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M9.2 9.2a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.4-2.8 4" />
+                <line x1="12" y1="17.5" x2="12.01" y2="17.5" />
+              </svg>
+            </button>
+          </div>
+
           ${this.renderUpcomingHeading()}
+
+          <div class="flex flex-col gap-2.5">
+            ${
+              featured.length > 0
+                ? featured.map((lobby) =>
+                    this.renderLobbyCard(
+                      lobby,
+                      getGameModeLabel(lobby.gameConfig!),
+                    ),
+                  )
+                : this.offlineForLobbies()
+                  ? this.renderLobbiesUnavailable()
+                  : this.lobbies === null
+                    ? html`<div
+                        class="flex items-center justify-center py-6"
+                        role="status"
+                        aria-label=${translateText("common.loading")}
+                      >
+                        <span
+                          class="size-10 rounded-full border-4 border-white/20 border-t-[var(--tc-accent)] animate-spin"
+                        ></span>
+                      </div>`
+                    : html`<p class="py-4 text-center text-sm text-white/60">
+                        ${translateText("public_lobby.no_matches")}
+                      </p>`
+            }
+          </div>
         </section>
 
         ${
@@ -792,6 +754,69 @@ export class GameModeSelector extends LitElement {
             : nothing
         }
       </div>
+    `;
+  }
+
+  /**
+   * Party: there is no party server, so playing with friends works the way it
+   * always has here: one player hosts a private lobby and sends the invite
+   * link (Invite), the others paste a code or link (Join with code).
+   */
+  private renderPartyPanel() {
+    const blocked = shouldBlockMultiplayerAction(
+      this.desktopUpdateState,
+      this.desktopSessionState,
+      this.backendOutage,
+    );
+    const hosted = this.hostedLobbyCount();
+    const state = !this.inputValid
+      ? DISABLED
+      : blocked
+        ? "opacity-50 cursor-not-allowed"
+        : "";
+    return html`
+      <aside class="tc-panel flex flex-col gap-3 p-4">
+        <h2 class="tc-label flex items-center gap-2 text-white">
+          <svg
+            viewBox="0 0 20 20"
+            class="size-5 text-[var(--tc-cyan)]"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M7 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7.5 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM1.6 15.4A5.5 5.5 0 0 1 12.4 15.4.9.9 0 0 1 11.5 17h-9a.9.9 0 0 1-.9-1.6Zm12.1 1.6h3.8a.9.9 0 0 0 .9-1.2 4.5 4.5 0 0 0-6.1-2.6 7 7 0 0 1 1.4 3.8Z"
+            />
+          </svg>
+          ${translateText("main.party_title")}
+        </h2>
+        <p class="text-sm leading-snug text-white/75">
+          ${translateText("main.party_desc")}
+        </p>
+        <button
+          @click=${this.openHostLobby}
+          ?disabled=${!this.inputValid}
+          aria-disabled=${blocked}
+          class="tc-btn-ghost flex h-11 items-center justify-center gap-2 text-sm ${state}"
+        >
+          ${translateText("main.party_invite")}
+        </button>
+        <button
+          @click=${this.openJoinLobby}
+          ?disabled=${!this.inputValid}
+          aria-disabled=${blocked}
+          class="relative flex h-9 items-center justify-center text-xs font-semibold uppercase tracking-[0.12em] text-white/70 hover:text-white ${state}"
+        >
+          ${translateText("main.party_join_code")}
+          ${
+            hosted > 0
+              ? html`<span
+                  class="ml-2 min-w-[1.25rem] rounded-full bg-red-500 px-1.5 text-[0.7rem] leading-5 text-white"
+                  >${hosted}</span
+                >`
+              : nothing
+          }
+        </button>
+      </aside>
     `;
   }
 
@@ -841,12 +866,6 @@ export class GameModeSelector extends LitElement {
     reportMultiplayerRefusal(false);
     return true;
   }
-
-  private openRankedMenu = () => {
-    if (this.blockedFromApiAction()) return;
-    if (!this.validateUsername()) return;
-    window.showPage?.("page-ranked");
-  };
 
   private openDetailedView = () => {
     if (!this.validateUsername()) return;
@@ -900,20 +919,22 @@ export class GameModeSelector extends LitElement {
   private renderUpcomingHeading() {
     const count = this.advertisedLobbyCount();
     return html`
-      <h2 class="min-w-0 sm:row-start-1">
+      <h2 class="min-w-0">
         <button
           @click=${this.openDetailedView}
           ?disabled=${!this.inputValid}
-          class="group/upcoming flex w-full items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/[0.04] py-1.5 pl-2.5 pr-1.5 transition-colors hover:border-malibu-blue/50 hover:bg-malibu-blue/15 ${
+          class="group/upcoming flex w-full items-center gap-3 ${
             this.inputValid ? "" : DISABLED
           }"
         >
+          <span class="h-px flex-1 bg-white/15"></span>
           <span
-            class="truncate text-sm font-bold uppercase tracking-widest text-white/70 group-hover/upcoming:text-white"
-            >${translateText("public_lobby.upcoming")}</span
+            class="tc-label text-[var(--tc-cyan)] group-hover/upcoming:text-white"
+            >${translateText("main.public_matches")}</span
           >
+          <span class="h-px flex-1 bg-white/15"></span>
           <span
-            class="flex shrink-0 items-center gap-0.5 rounded bg-malibu-blue py-0.5 pl-2 pr-1 text-xs font-bold uppercase tracking-wider text-white group-hover/upcoming:bg-aquarius"
+            class="flex shrink-0 items-center gap-0.5 rounded-md bg-white/10 py-0.5 pl-2 pr-1 text-xs font-bold uppercase tracking-wider text-white/80 group-hover/upcoming:bg-white/20"
           >
             ${
               count > 0
@@ -948,51 +969,6 @@ export class GameModeSelector extends LitElement {
     return this.lobbies?.games?.hosted?.length ?? 0;
   }
 
-  private renderSmallActionCard(
-    title: string,
-    onClick: () => void,
-    bgClass: string = SECONDARY_ACTION,
-    badge?: number,
-    // Only the three multiplayer action cards (create/ranked/join) pass this;
-    // the solo card is never gated (see openSinglePlayerModal) and must never
-    // show as disabled here.
-    gated: boolean = false,
-    adornment: TemplateResult | typeof nothing = nothing,
-  ) {
-    const blocked =
-      gated &&
-      shouldBlockMultiplayerAction(
-        this.desktopUpdateState,
-        this.desktopSessionState,
-        this.backendOutage,
-      );
-    return html`
-      <button
-        @click=${onClick}
-        ?disabled=${!this.inputValid}
-        aria-disabled=${blocked}
-        class="relative flex items-center justify-center w-full h-full rounded-lg ${bgClass} transition-all duration-200 text-sm lg:text-base font-medium text-white uppercase tracking-wider text-center ${
-          !this.inputValid
-            ? DISABLED
-            : blocked
-              ? "opacity-50 cursor-not-allowed"
-              : ""
-        }"
-      >
-        ${title}
-        ${
-          badge
-            ? html`<span
-                class="absolute -top-2 -right-2 min-w-[1.375rem] h-[1.375rem] px-1.5 flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold tracking-normal"
-                >${badge}</span
-              >`
-            : nothing
-        }
-        ${adornment}
-      </button>
-    `;
-  }
-
   private renderLobbyCard(
     lobby: PublicGameInfo,
     titleContent: string | TemplateResult,
@@ -1020,7 +996,7 @@ export class GameModeSelector extends LitElement {
     // Socket-sourced, so a list-API outage neither dims this nor refuses it:
     // the same predicate validateAndJoin uses, for the reason in the rule at
     // the top of this file.
-    return lobbyCard({
+    return lobbyRow({
       lobby,
       subtitle: titleContent,
       timeDisplay,

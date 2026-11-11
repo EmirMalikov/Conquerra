@@ -362,22 +362,20 @@
         }
       })();
     </script>
-    <div id="hex-grid" class="fixed inset-0 -z-50 pointer-events-none">
+    <!-- Menu backdrop: the game's own world map (resources/maps/world, CC
+         BY-SA 4.0) over a deep ocean, darkened toward the edges so the
+         panels read on top of it. -->
+    <div
+      id="hex-grid"
+      class="fixed inset-0 -z-50 pointer-events-none overflow-hidden bg-[#0b2a4f]"
+    >
       <div
         id="background-layer"
-        class="absolute inset-x-0 top-0 -bottom-[4cm] bg-cover opacity-30 [filter:brightness(1.0)] dark:[filter:sepia(0.2)_saturate(1.2)_hue-rotate(180deg)_brightness(0.9)]"
-        style="
-          background-image: var(--background-image-url);
-          background-position: center top;
-        "
+        class="absolute -inset-[4%] bg-cover bg-center opacity-80 [filter:saturate(1.15)_brightness(0.8)]"
+        style="background-image: var(--background-image-url)"
       ></div>
       <div
-        class="absolute inset-0 bg-center bg-no-repeat bg-contain hidden lg:block"
-        style="background-image: var(--desktop-logo-image-url); opacity: 0.5"
-      ></div>
-      <div
-        class="absolute inset-0 bg-center bg-no-repeat bg-contain lg:hidden"
-        style="background-image: var(--mobile-logo-image-url); opacity: 0.5"
+        class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgb(8_18_38/0.15)_0%,rgb(8_18_38/0.55)_55%,rgb(5_10_24/0.92)_100%)]"
       ></div>
     </div>
 

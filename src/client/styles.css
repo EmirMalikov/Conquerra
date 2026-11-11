@@ -906,3 +906,147 @@ unit-display .tutorial-highlight::after {
 .unit-display-more-right::after {
   opacity: 1;
 }
+
+/* ------------------------------------------------------------------ */
+/* TerraClash theme: dark-navy glass panels, round corners, warm       */
+/* yellow/orange accents and a chunky rounded display font.            */
+/* ------------------------------------------------------------------ */
+:root {
+  --tc-panel: rgb(14 22 42 / 0.86);
+  --tc-panel-strong: rgb(10 16 32 / 0.94);
+  --tc-panel-border: rgb(120 150 210 / 0.18);
+  --tc-accent: #ffb627;
+  --tc-accent-deep: #f08a00;
+  --tc-accent-ink: #2a1600;
+  --tc-cyan: #4cc3ff;
+  --tc-green: #43d17a;
+}
+
+.tc-panel {
+  background: var(--tc-panel);
+  border: 1px solid var(--tc-panel-border);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 12px 32px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.tc-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Big chunky primary button with a darker "lip" under it. */
+.tc-btn-primary {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tc-accent-ink);
+  background: linear-gradient(
+    180deg,
+    #ffd25a 0%,
+    var(--tc-accent) 55%,
+    #ffa514 100%
+  );
+  border-radius: 0.9rem;
+  box-shadow:
+    0 5px 0 var(--tc-accent-deep),
+    0 10px 20px rgb(0 0 0 / 0.35);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
+}
+.tc-btn-primary:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+.tc-btn-primary:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 1px 0 var(--tc-accent-deep),
+    0 4px 10px rgb(0 0 0 / 0.35);
+}
+
+.tc-btn-ghost {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #e6eeff;
+  background: rgb(255 255 255 / 0.05);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 0.75rem;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+.tc-btn-ghost:hover {
+  background: rgb(255 255 255 / 0.1);
+  border-color: rgb(255 255 255 / 0.22);
+}
+
+/* Small pill used for JOIN on lobby rows. */
+.tc-chip {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tc-cyan);
+  border: 1.5px solid rgb(76 195 255 / 0.55);
+  background: rgb(76 195 255 / 0.08);
+  border-radius: 0.6rem;
+}
+
+/* Round dark icon buttons in the top-left cluster. */
+.tc-round-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  color: #fff;
+  background: rgb(10 16 32 / 0.85);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.35);
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease;
+}
+.tc-round-btn:hover {
+  background: rgb(30 42 70 / 0.95);
+  transform: translateY(-1px);
+}
+.tc-round-btn.active {
+  color: var(--tc-accent);
+}
+
+/* The menu's giant 3D title: light face, warm gradient, stacked shadow. */
+.tc-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #fffaf0 0%, #ffe9c2 45%, #ffc06b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 0 #c86a00) drop-shadow(0 4px 0 #8a4300)
+    drop-shadow(0 8px 14px rgb(0 0 0 / 0.55));
+}
+
+.tc-subtitle {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: #eaf1ff;
+  text-shadow: 0 2px 6px rgb(0 0 0 / 0.6);
+}

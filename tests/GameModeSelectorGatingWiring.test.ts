@@ -388,50 +388,32 @@ describe("the upcoming heading (the route to the lobby browser)", () => {
  * left a track empty: loading, a snapshot with no FFA lobby, and a column
  * with only one of its two cards.
  */
-describe("grid placement", () => {
-  const section = () => selector.querySelector("section")!;
-  const heroSlot = () =>
-    selector.querySelector(":scope > div > div.sm\\:col-start-1");
-
-  it("keeps the upcoming column beside the spinner while loading", () => {
-    expect(heroSlot()).not.toBeNull();
-    const spinner = heroSlot()!.querySelector('div[role="status"]');
-    expect(spinner).not.toBeNull();
-    expect(spinner!.className).toContain("h-44 sm:h-full");
-    expect(section().className).toContain("sm:col-start-2");
-    expect(section().className).not.toContain("sm:col-span-2");
-  });
-
-  it("renders a static placeholder without role=status when loaded without an FFA lobby", async () => {
-    await pushLobbies({ team: [publicLobby("team-1")] });
-    expect(heroSlot()).not.toBeNull();
-    expect(heroSlot()!.querySelector('div[role="status"]')).toBeNull();
-    const placeholder = heroSlot()!.querySelector("div.rounded-2xl.bg-surface");
-    expect(placeholder).not.toBeNull();
-    expect(placeholder!.className).toContain("h-44 sm:h-full");
-    expect(section().className).toContain("sm:col-start-2");
-    expect(section().className).not.toContain("sm:col-span-2");
-  });
-
-  it("lets a lone card take both card rows", async () => {
-    await pushLobbies({
-      ffa: [publicLobby("ffa-1")],
-      team: [publicLobby("t")],
-    });
-    const card = section().querySelector("div.sm\\:min-h-0")!;
-    expect(card.className).toContain("sm:row-start-2 sm:row-span-2");
-  });
-
-  it("stacks two cards on their own rows", async () => {
-    await pushLobbies({
-      ffa: [publicLobby("ffa-1")],
-      team: [publicLobby("t")],
-      special: [publicLobby("s")],
-    });
-    const rows = Array.from(section().querySelectorAll("div.sm\\:min-h-0")).map(
-      (c) => c.className,
+describe("public matches list", () => {
+  const panel = () => selector.querySelector("section.tc-panel")!;
+  const rows = () =>
+    Array.from(panel().querySelectorAll("button")).filter((b) =>
+      b.querySelector(".tc-chip"),
     );
-    expect(rows.some((c) => c.includes("sm:row-start-3"))).toBe(true);
-    expect(rows.some((c) => c.includes("sm:row-span-2"))).toBe(false);
+
+  it("shows a spinner in the panel while the first snapshot loads", () => {
+    expect(panel().querySelector('div[role="status"]')).not.toBeNull();
+    expect(rows()).toHaveLength(0);
+  });
+
+  it("renders one row per scheduled lobby type, ffa first", async () => {
+    await pushLobbies({
+      special: [publicLobby("s")],
+      ffa: [publicLobby("ffa-1")],
+      team: [publicLobby("t")],
+    });
+    expect(panel().querySelector('div[role="status"]')).toBeNull();
+    expect(rows()).toHaveLength(3);
+  });
+
+  it("says there are no matches when a loaded snapshot is empty", async () => {
+    await pushLobbies({});
+    expect(panel().querySelector('div[role="status"]')).toBeNull();
+    expect(rows()).toHaveLength(0);
+    expect(panel().textContent).toContain("public_lobby.no_matches");
   });
 });

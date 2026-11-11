@@ -103,14 +103,18 @@ describe("the nav bars that host the cluster", () => {
     window.currentPageId = "page-play";
   });
 
-  it("puts the cogwheel in the desktop bar, immediately left of the avatar", async () => {
+  it("puts the cogwheel in the desktop bar's round icon cluster", async () => {
     const bar = await mount("desktop-nav-bar");
     expect(settingsButton(bar)).not.toBeNull();
 
+    // The cluster sits with the other round buttons on the left; the account
+    // menu stays on the far right of the same bar.
     const cluster = bar.querySelector("nav-utility-icons")!;
-    expect(cluster.nextElementSibling?.tagName.toLowerCase()).toBe(
-      "nav-account-menu",
-    );
+    expect(cluster.getAttribute("size")).toBe("desktop");
+    expect(
+      cluster.parentElement!.querySelector(".tc-round-btn"),
+    ).not.toBeNull();
+    expect(bar.querySelector("nav-account-menu")).not.toBeNull();
   });
 
   it("puts the cogwheel in the mobile top bar too", async () => {

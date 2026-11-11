@@ -301,6 +301,92 @@ export function lobbyCard({
 }
 
 /**
+ * The compact lobby row used in the main menu's "Public matches" list: map
+ * thumbnail, mode and map, players N/max with the start countdown, and a JOIN
+ * chip. Same options and click behaviour as lobbyCard.
+ */
+export function lobbyRow({
+  lobby,
+  subtitle,
+  timeDisplay,
+  timeDisplayUppercase = false,
+  onClick,
+  disabled = false,
+  blocked = false,
+  viewerTrusted = false,
+}: LobbyCardOptions): TemplateResult {
+  const mapType = lobby.gameConfig!.gameMap as GameMapType;
+  const mapName = getMapName(lobby.gameConfig?.gameMap);
+  const title = (lobby.featured ? lobby.label : undefined) ?? mapName;
+  // "Starting…" stands alone; a countdown reads "Starting in 0:35".
+  const when = timeDisplayUppercase
+    ? timeDisplay
+    : translateText("public_lobby.starting_in", { time: timeDisplay });
+  const capacity = lobby.gameConfig?.maxPlayers;
+  const players =
+    capacity === undefined
+      ? translateText("public_lobby.players", { count: lobby.numClients })
+      : translateText("public_lobby.players_of", {
+          count: lobby.numClients,
+          max: capacity,
+        });
+  const trustedOnly = lobby.gameConfig?.trusted === true;
+  const state = disabled
+    ? "opacity-50 cursor-not-allowed pointer-events-none"
+    : blocked
+      ? "opacity-50 cursor-not-allowed"
+      : "";
+
+  return html`
+    <button
+      @click=${onClick}
+      ?disabled=${disabled}
+      aria-disabled=${blocked}
+      class="group relative flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-2.5 pr-3 text-left text-white transition-colors hover:border-[rgb(76_195_255/0.6)] hover:bg-[rgb(76_195_255/0.08)] ${state}"
+    >
+      <span
+        class="relative h-10 w-14 sm:h-12 sm:w-[5.5rem] shrink-0 overflow-hidden rounded-lg bg-[#0b2a4f]"
+      >
+        <img
+          src=${terrainMapFileLoader.getMapData(mapType).webpPath}
+          alt=${mapName ?? mapType}
+          draggable="false"
+          class="pointer-events-none size-full select-none ${
+            fitsByContain(mapType) ? "object-contain" : "object-cover"
+          }"
+        />
+      </span>
+      <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span
+          class="truncate font-display text-base font-bold uppercase tracking-[0.12em]"
+          >${subtitle || title}</span
+        >
+        <span class="flex min-w-0 items-center gap-1.5 text-sm text-white/75">
+          <span
+            class="size-2 shrink-0 rounded-full bg-[var(--tc-green)]"
+          ></span>
+          <span class="truncate"
+            >${title && subtitle ? html`${title} · ` : nothing}${players} ·
+            <span class="tabular-nums">${when}</span></span
+          >
+        </span>
+      </span>
+      ${
+        trustedOnly
+          ? trustLockIcon(viewerTrusted, {
+              position: "top-1 right-1",
+              small: true,
+            })
+          : nothing
+      }
+      <span class="tc-chip shrink-0 px-3 py-1 text-sm"
+        >${translateText("public_lobby.join")}</span
+      >
+    </button>
+  `;
+}
+
+/**
  * Bottom-right info icon on a player's listed lobby. Hovering shows that a
  * player made it and the settings it runs with, since a custom lobby in a
  * public queue otherwise looks like a scheduled game.

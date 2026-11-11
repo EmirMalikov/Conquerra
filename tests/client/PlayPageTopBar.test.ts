@@ -74,27 +74,15 @@ describe("play-page mobile top bar", () => {
     });
   });
 
-  describe("top strip layout", () => {
+  describe("hero", () => {
     beforeEach(mount);
 
-    it("marks the top strip as group/strip for descendant streaming-live overrides", () => {
-      const strip = el.querySelector(".group\\/strip");
-      expect(strip).not.toBeNull();
-      expect(strip?.className).toContain(
-        "lg:has-[.streaming-live]:grid-cols-[2fr_1fr]",
-      );
-
-      const streamingNow = strip!.querySelector("streaming-now");
-      expect(streamingNow).not.toBeNull();
-      expect(strip!.matches(":has(.streaming-live)")).toBe(false);
-
-      streamingNow!.classList.add("streaming-live");
-      expect(strip!.matches(":has(.streaming-live)")).toBe(true);
-      expect(
-        el.querySelector(
-          ":where(.group\\/strip):has(.streaming-live) username-input",
-        ),
-      ).not.toBeNull();
+    it("shows the game title and the tagline above the mode selector", () => {
+      const title = el.querySelector("h1.tc-title");
+      expect(title).not.toBeNull();
+      expect(title!.textContent).toContain("main.game_name");
+      expect(el.textContent).toContain("main.subtitle");
+      expect(el.querySelector("header + game-mode-selector")).not.toBeNull();
     });
   });
 });
