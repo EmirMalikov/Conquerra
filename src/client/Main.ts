@@ -208,6 +208,7 @@ import "./styles/core/typography.css";
 import "./styles/core/variables.css";
 import "./styles/layout/container.css";
 import "./styles/layout/header.css";
+import { ADS_ENABLED, MONETIZATION_ENABLED } from "./BuildFlags";
 
 type RampUserProfile = { format: "UUP1"; heid: { sha256: string } };
 
@@ -496,10 +497,14 @@ class Client {
     // Register modals with the URL router. Lobby modals (join/host) and
     // matchmaking are intentionally omitted — they own their own URL state
     // (path-based) or none at all.
-    modalRouter.register("store", {
-      tag: "store-modal",
-      pageId: "page-item-store",
-    });
+    // The store and subscriptions are off in this build, so their URLs
+    // (#modal=store, #modal=subscription) open nothing.
+    if (MONETIZATION_ENABLED) {
+      modalRouter.register("store", {
+        tag: "store-modal",
+        pageId: "page-item-store",
+      });
+    }
     modalRouter.register("settings", {
       tag: "user-setting",
       pageId: "page-settings",
@@ -833,8 +838,13 @@ class Client {
       }
       const isAdFree =
         userMeResponse !== false && userMeResponse.player?.adfree === true;
+      // ADS_ENABLED is off in this build: no banners, rails, Admiral or
+      // hashed-email sync, whoever is signed in.
       window.adsEnabled =
-        !isAdFree && !gamePortal.isOnGamePortal() && !isDesktopShell();
+        ADS_ENABLED &&
+        !isAdFree &&
+        !gamePortal.isOnGamePortal() &&
+        !isDesktopShell();
       syncHashedEmail(userMeResponse, window.adsEnabled).catch((e) =>
         console.warn("Hashed email sync failed", e),
       );
@@ -1046,6 +1056,8 @@ class Client {
               window.location.hash = hash;
             },
             openRewards: () => {
+              // Subscription rewards: none in this build.
+              if (!MONETIZATION_ENABLED) return;
               // Signed in as for trustRequiredDialog: a linked identity, or a
               // portal sign-in (only the SDK knows that one).
               void (async () => {

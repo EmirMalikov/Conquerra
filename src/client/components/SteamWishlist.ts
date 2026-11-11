@@ -1,5 +1,6 @@
 import { html, LitElement, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
+import { MONETIZATION_ENABLED } from "../BuildFlags";
 import { gamePortal } from "../GamePortal";
 import { steamSDK } from "../SteamSDK";
 import { translateText } from "../Utils";
@@ -108,6 +109,8 @@ export class SteamWishlist extends LitElement {
   // (index.html), and an iframe whose color scheme differs from its
   // document's gets an opaque white backdrop, a white strip under the card.
   render() {
+    // Nothing to buy in this build (BuildFlags.MONETIZATION_ENABLED).
+    if (!MONETIZATION_ENABLED) return nothing;
     // Poki doesn't allow promoting other platforms.
     if (steamSDK.isOnSteam() || gamePortal.name() === "poki") return nothing;
 

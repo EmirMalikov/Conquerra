@@ -1,6 +1,14 @@
 import type { Cosmetics, Effect } from "@openfront/shared/CosmeticSchemas";
 import { nothing, type LitElement } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// These tests cover the upstream store/ad code, which this build keeps
+// behind flags that are off (src/client/BuildFlags.ts): turn them on.
+vi.mock("../../src/client/BuildFlags", () => ({
+  ADS_ENABLED: true,
+  MONETIZATION_ENABLED: true,
+}));
+
 import type { CosmeticCard } from "../../src/client/components/CosmeticCard";
 import type { EffectsGrid } from "../../src/client/components/EffectsGrid";
 import type { PurchaseButton } from "../../src/client/components/PurchaseButton";

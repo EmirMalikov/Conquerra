@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
+// These tests cover the upstream store code, which this build keeps
+// behind flags that are off (src/client/BuildFlags.ts): turn them on.
+vi.mock("../../../src/client/BuildFlags", () => ({
+  ADS_ENABLED: true,
+  MONETIZATION_ENABLED: true,
+}));
+
 vi.mock("../../../src/client/SteamSDK", () => ({
   steamSDK: { isOnSteam: () => false },
 }));

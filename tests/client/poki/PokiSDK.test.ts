@@ -1,5 +1,13 @@
 import { Howler } from "howler";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// These tests cover the upstream store/ad code, which this build keeps
+// behind flags that are off (src/client/BuildFlags.ts): turn them on.
+vi.mock("../../../src/client/BuildFlags", () => ({
+  ADS_ENABLED: true,
+  MONETIZATION_ENABLED: true,
+}));
+
 import { PokiSDK } from "../../../src/client/poki/PokiSDK";
 
 type FakePoki = NonNullable<Window["PokiSDK"]>;

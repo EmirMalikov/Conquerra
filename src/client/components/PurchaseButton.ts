@@ -1,15 +1,16 @@
 import { Product } from "@openfront/shared/CosmeticSchemas";
 import { html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { MONETIZATION_ENABLED } from "../BuildFlags";
 import type { InsufficientCurrency, PurchaseResult } from "../Cosmetics";
 import { showInGameAlert } from "../InGameModal";
-import { translateText } from "../Utils";
 import "./CapIcon";
 import "./ConfirmDialog";
 import "./InlineCheckout";
-import type { InlineCheckoutConfig } from "./InlineCheckout";
+import { translateText } from "../Utils";
 import "./InsufficientCurrencyDialog";
 import "./PlutoniumIcon";
+import type { InlineCheckoutConfig } from "./InlineCheckout";
 
 const PURCHASE_STYLE_ID = "purchase-button-styles";
 if (!document.getElementById(PURCHASE_STYLE_ID)) {
@@ -490,6 +491,8 @@ export class PurchaseButton extends LitElement {
   }
 
   render() {
+    // Nothing to buy in this build (BuildFlags.MONETIZATION_ENABLED).
+    if (!MONETIZATION_ENABLED) return nothing;
     const hasDollar = this.offersDollar;
     const hasHard = this.offersHard;
     const hasSoft = this.offersSoft;

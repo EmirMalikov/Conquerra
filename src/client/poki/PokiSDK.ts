@@ -1,4 +1,5 @@
 import { Howler } from "howler";
+import { ADS_ENABLED } from "../BuildFlags";
 import type { PortalUser } from "../GamePortal";
 import { connectPokiBridge, isPokiBridged } from "./PokiBridge";
 
@@ -336,7 +337,8 @@ export class PokiSDK {
   // Poki decides whether an ad actually plays, and requires gameplay stopped
   // and audio muted for its duration.
   async requestMidgameAd(): Promise<void> {
-    if (!this.isReady()) {
+    // No ad breaks in this build (BuildFlags.ADS_ENABLED).
+    if (!ADS_ENABLED || !this.isReady()) {
       return;
     }
     await this.gameplayStop();

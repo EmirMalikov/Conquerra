@@ -1,6 +1,7 @@
-import { html, LitElement, TemplateResult } from "lit";
+import { html, LitElement, nothing, TemplateResult } from "lit";
 import { customElement } from "lit/decorators.js";
 import "./GameWordmark";
+import { MONETIZATION_ENABLED } from "../BuildFlags";
 import { NavNotificationsController } from "./NavNotificationsController";
 
 const MOBILE_ITEM =
@@ -98,18 +99,22 @@ export class MobileNavBar extends LitElement {
           data-page="page-play"
           data-i18n="main.play"
         ></button>
-        <div
-          class="no-game-portal nav-menu-item flex items-center w-full cursor-pointer"
-          data-page="page-item-store"
-          @click=${this._notifications.onStoreClick}
-        >
-          <button class="${MOBILE_ITEM}" data-i18n="main.store"></button>
-          ${
-            this._notifications.showStoreDot()
-              ? this._renderDot("bg-red-500")
-              : ""
-          }
-        </div>
+        ${
+          MONETIZATION_ENABLED
+            ? html`<div
+                class="no-game-portal nav-menu-item flex items-center w-full cursor-pointer"
+                data-page="page-item-store"
+                @click=${this._notifications.onStoreClick}
+              >
+                <button class="${MOBILE_ITEM}" data-i18n="main.store"></button>
+                ${
+                  this._notifications.showStoreDot()
+                    ? this._renderDot("bg-red-500")
+                    : ""
+                }
+              </div>`
+            : nothing
+        }
         <button
           class="${MOBILE_ITEM} ${
             currentPage === "page-inventory" ? "active" : ""

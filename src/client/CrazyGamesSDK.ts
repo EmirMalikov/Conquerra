@@ -1,3 +1,5 @@
+import { ADS_ENABLED } from "./BuildFlags";
+
 export interface CrazyGamesUser {
   username: string;
   profilePictureUrl: string;
@@ -379,7 +381,8 @@ class CrazyGamesSDK {
 
   requestMidgameAd(): Promise<void> {
     return new Promise((resolve) => {
-      if (!this.isReady()) {
+      // No ad breaks in this build (BuildFlags.ADS_ENABLED).
+      if (!ADS_ENABLED || !this.isReady()) {
         resolve();
         return;
       }

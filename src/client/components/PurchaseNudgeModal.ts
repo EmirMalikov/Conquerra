@@ -1,6 +1,7 @@
 import type { UserMeResponse } from "@openfront/shared/ApiSchemas";
 import { html, LitElement, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { MONETIZATION_ENABLED } from "../BuildFlags";
 import { isDesktopShell } from "../DesktopShell";
 import { gamePortal } from "../GamePortal";
 import { getGamesPlayed, translateText } from "../Utils";
@@ -25,6 +26,8 @@ export class PurchaseNudgeModal extends LitElement {
   @state() private isVisible = false;
 
   private onUserMeResponse = (event: Event) => {
+    // No purchases to nudge toward in this build.
+    if (!MONETIZATION_ENABLED) return;
     if (this.isVisible) return;
     const detail = (event as CustomEvent<UserMeResponse | false>).detail;
     if (detail !== false && detail.player.adfree === true) {

@@ -2,8 +2,9 @@ import type { Cosmetics, Promotion } from "@openfront/shared/CosmeticSchemas";
 import type { TemplateResult } from "lit";
 import { html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { translateText } from "../Utils";
+import { MONETIZATION_ENABLED } from "../BuildFlags";
 import "./SaleCountdown";
+import { translateText } from "../Utils";
 
 /** The catalog's sales that haven't ended yet, of `only` if given. */
 export function runningSales(
@@ -89,6 +90,8 @@ export class SaleBanner extends LitElement {
   }
 
   render() {
+    // Nothing to buy in this build (BuildFlags.MONETIZATION_ENABLED).
+    if (!MONETIZATION_ENABLED) return nothing;
     const sales = this.sales;
     if (sales.length === 0) return nothing;
     const flash = sales.find((sale) => sale.kind === "flash");

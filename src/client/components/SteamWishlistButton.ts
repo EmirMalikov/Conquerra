@@ -1,6 +1,7 @@
 import { assetUrl } from "@openfront/shared/AssetUrls";
 import { html, LitElement, nothing } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { MONETIZATION_ENABLED } from "../BuildFlags";
 import { gamePortal } from "../GamePortal";
 import { steamSDK } from "../SteamSDK";
 import { translateText } from "../Utils";
@@ -28,6 +29,8 @@ export class SteamWishlistButton extends LitElement {
   }
 
   render() {
+    // Nothing to buy in this build (BuildFlags.MONETIZATION_ENABLED).
+    if (!MONETIZATION_ENABLED) return nothing;
     if (steamSDK.isOnSteam() || gamePortal.name() === "poki") return nothing;
 
     return html`

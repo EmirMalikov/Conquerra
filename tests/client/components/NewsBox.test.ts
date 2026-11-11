@@ -13,6 +13,13 @@ import {
   refreshStaleCosmetics,
 } from "../../../src/client/Cosmetics";
 
+// These tests cover the upstream store code, which this build keeps
+// behind flags that are off (src/client/BuildFlags.ts): turn them on.
+vi.mock("../../../src/client/BuildFlags", () => ({
+  ADS_ENABLED: true,
+  MONETIZATION_ENABLED: true,
+}));
+
 vi.mock("../../../src/client/Api", () => ({
   getNews: vi.fn(async () => [
     {

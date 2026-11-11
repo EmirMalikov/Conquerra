@@ -1,4 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+// These tests cover the upstream store/ad code, which this build keeps
+// behind flags that are off (src/client/BuildFlags.ts): turn them on.
+vi.mock("../../src/client/BuildFlags", () => ({
+  ADS_ENABLED: true,
+  MONETIZATION_ENABLED: true,
+}));
+
 import "../../src/client/components/CustomCurrencyCard";
 import type { CustomCurrencyCard } from "../../src/client/components/CustomCurrencyCard";
 import { startPurchase } from "../../src/client/Payments";

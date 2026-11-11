@@ -1,10 +1,11 @@
 import { assetUrl } from "@openfront/shared/AssetUrls";
 import { LitElement, html, nothing, svg } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { MONETIZATION_ENABLED } from "../BuildFlags";
 import { UserSettings } from "../UserSettings";
-import { translateText } from "../Utils";
 import "./NavAccountMenu";
 import "./NavUtilityIcons";
+import { translateText } from "../Utils";
 
 /** Where the sound button keeps the volume to restore on unmute. */
 const LAST_MASTER_VOLUME_KEY = "tc.lastMasterVolume";
@@ -153,7 +154,15 @@ export class DesktopNavBar extends LitElement {
               ${this.pageLink("page-play", "main.play")}
               ${this.pageLink("page-leaderboard", "main.leaderboard")}
               ${this.pageLink("page-clan", "main.clans", "no-game-portal")}
-              ${this.pageLink("page-item-store", "main.store", "no-game-portal")}
+              ${
+                MONETIZATION_ENABLED
+                  ? this.pageLink(
+                      "page-item-store",
+                      "main.store",
+                      "no-game-portal",
+                    )
+                  : nothing
+              }
               ${this.pageLink("page-inventory", "main.inventory")}
             </div>
           </div>
