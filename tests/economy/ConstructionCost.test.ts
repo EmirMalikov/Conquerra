@@ -3,6 +3,7 @@ import {
   PlayerType,
   UnitType,
 } from "@openfront/engine-api/game/GameTypes";
+import { ECONOMY_BUILDING_BASE_COST } from "@openfront/engine/configuration/EngineConfig";
 import { ConstructionExecution } from "@openfront/engine/execution/ConstructionExecution";
 import { Game, Player } from "@openfront/engine/game/Game";
 import { setup } from "../util/Setup";
@@ -10,7 +11,7 @@ import { setup } from "../util/Setup";
 // Regression test: the ghost/build-menu price of a structure must not double-count
 // a player's first structure while it is still under construction.
 //
-// The cost scales as 2^(units built) * base: 1st city 125k, 2nd 250k, 3rd 500k.
+// The cost scales as 2^(units built) * base: 1st city 100k, 2nd 200k, 3rd 400k.
 // Cost uses Math.min(unitsOwned, unitsConstructed) so CAPTURED units (owned but
 // not built) don't inflate the price. unitsConstructed used to also loop over
 // under-construction units, double-counting them and defeating that Math.min —
@@ -57,9 +58,11 @@ describe("Structure cost while under construction", () => {
 
   test("first city under construction does not double-count itself", () => {
     buildFirstCityUnderConstruction();
-    // One built city (under construction) → next city is the 2nd → 250k.
+    // One built city (under construction) → next city is the 2nd → 2x base.
     expect(player.unitsConstructed(UnitType.City)).toBe(1);
-    expect(game.unitInfo(UnitType.City).cost(game, player)).toBe(250_000n);
+    expect(game.unitInfo(UnitType.City).cost(game, player)).toBe(
+      BigInt(2 * ECONOMY_BUILDING_BASE_COST),
+    );
   });
 
   test("captured city does not inflate the price of a city under construction", () => {
@@ -72,6 +75,8 @@ describe("Structure cost while under construction", () => {
     // Player has BUILT exactly one city (still under construction). The captured
     // city must not count toward build cost, so the next city is still 250k.
     expect(player.unitsConstructed(UnitType.City)).toBe(1);
-    expect(game.unitInfo(UnitType.City).cost(game, player)).toBe(250_000n);
+    expect(game.unitInfo(UnitType.City).cost(game, player)).toBe(
+      BigInt(2 * ECONOMY_BUILDING_BASE_COST),
+    );
   });
 });

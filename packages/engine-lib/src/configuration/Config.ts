@@ -73,6 +73,13 @@ const DOOMSDAY_CLOCK_DEFAULTS = {
 // Share of the land a side must hold to win, in every game mode.
 const PERCENT_TILES_OWNED_TO_WIN = 80;
 
+/**
+ * TerraClash balance: troops regrow 15% faster than upstream, so a
+ * player is back on the attack sooner. Applies to every player type, so
+ * the difficulty scaling between humans, nations and bots is unchanged.
+ */
+export const TROOP_GROWTH_MULTIPLIER = 1.15;
+
 // Overtime tunables (anti-stalemate). Off unless enabled in GameConfig.
 // After startMinutes the percentage of tiles required to win falls from the
 // base by dropPercentPerMinute, with no floor: the bar keeps sinking until the
@@ -385,7 +392,7 @@ export class Config {
   troopIncreaseRate(player: PlayerLike): number {
     const max = this.maxTroops(player);
 
-    let toAdd = 10 + pow(player.troops(), 0.73) / 4;
+    let toAdd = (10 + pow(player.troops(), 0.73) / 4) * TROOP_GROWTH_MULTIPLIER;
 
     const ratio = 1 - player.troops() / max;
     toAdd *= ratio;

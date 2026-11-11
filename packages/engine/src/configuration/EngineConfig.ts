@@ -62,6 +62,24 @@ const LARGE_TERRITORY_STEEPNESS = 2.5;
 const LARGE_ATTACKER_DEPTH = 0.7;
 const LARGE_DEFENDER_DEPTH = 0.3;
 const BOT_DEFENDER_LOSS_MULT = 0.7;
+// TerraClash balance (see the economy table in the fork notes): buildings
+// and the first nukes are cheaper, and passive gold income is higher, so
+// the early game reaches its first city, port and factory sooner.
+/** Passive gold per tick for players and nations (upstream: 100). */
+export const BASE_GOLD_PER_TICK = 130n;
+/** Passive gold per tick for bots (upstream: 50). */
+export const BOT_GOLD_PER_TICK = 65n;
+/** First city/port/factory; each further one doubles (upstream: 125k). */
+export const ECONOMY_BUILDING_BASE_COST = 100_000;
+/** Cap on a city/port/factory (upstream: 1M). */
+export const ECONOMY_BUILDING_MAX_COST = 800_000;
+/** Defense post cost step and cap (upstream: 50k steps, 250k cap). */
+export const DEFENSE_POST_COST_STEP = 40_000;
+export const DEFENSE_POST_MAX_COST = 200_000;
+/** Missile silo (upstream: 1M). */
+export const MISSILE_SILO_COST = 800_000;
+/** Atom bomb (upstream: 750k). */
+export const ATOM_BOMB_COST = 600_000;
 const TERRA_NULLIUS_COST_SCALE = 2000;
 const TERRA_NULLIUS_MIN_COST = 5;
 const TERRA_NULLIUS_MAX_COST = 100;
@@ -354,12 +372,16 @@ export class EngineConfig extends Config {
         );
       case UnitType.Port:
         return this.costWrapper(
-          (numUnits: number) => Math.min(1_000_000, pow2(numUnits) * 125_000),
+          (numUnits: number) =>
+            Math.min(
+              ECONOMY_BUILDING_MAX_COST,
+              pow2(numUnits) * ECONOMY_BUILDING_BASE_COST,
+            ),
           UnitType.Port,
           UnitType.Factory,
         );
       case UnitType.AtomBomb:
-        return this.costWrapper(() => 750_000, UnitType.AtomBomb);
+        return this.costWrapper(() => ATOM_BOMB_COST, UnitType.AtomBomb);
       case UnitType.HydrogenBomb:
         return this.costWrapper(() => 5_000_000, UnitType.HydrogenBomb);
       case UnitType.MIRV:
@@ -373,10 +395,14 @@ export class EngineConfig extends Config {
           return 25_000_000n + BigInt(game.mirvsLaunched()) * 15_000_000n;
         };
       case UnitType.MissileSilo:
-        return this.costWrapper(() => 1_000_000, UnitType.MissileSilo);
+        return this.costWrapper(() => MISSILE_SILO_COST, UnitType.MissileSilo);
       case UnitType.DefensePost:
         return this.costWrapper(
-          (numUnits: number) => Math.min(250_000, (numUnits + 1) * 50_000),
+          (numUnits: number) =>
+            Math.min(
+              DEFENSE_POST_MAX_COST,
+              (numUnits + 1) * DEFENSE_POST_COST_STEP,
+            ),
           UnitType.DefensePost,
         );
       case UnitType.SAMLauncher:
@@ -386,12 +412,20 @@ export class EngineConfig extends Config {
         );
       case UnitType.City:
         return this.costWrapper(
-          (numUnits: number) => Math.min(1_000_000, pow2(numUnits) * 125_000),
+          (numUnits: number) =>
+            Math.min(
+              ECONOMY_BUILDING_MAX_COST,
+              pow2(numUnits) * ECONOMY_BUILDING_BASE_COST,
+            ),
           UnitType.City,
         );
       case UnitType.Factory:
         return this.costWrapper(
-          (numUnits: number) => Math.min(1_000_000, pow2(numUnits) * 125_000),
+          (numUnits: number) =>
+            Math.min(
+              ECONOMY_BUILDING_MAX_COST,
+              pow2(numUnits) * ECONOMY_BUILDING_BASE_COST,
+            ),
           UnitType.Factory,
           UnitType.Port,
         );
@@ -677,9 +711,9 @@ export class EngineConfig extends Config {
     const multiplier = this.goldMultiplierFor(player);
     let baseRate: bigint;
     if (player.type() === PlayerType.Bot) {
-      baseRate = 50n;
+      baseRate = BOT_GOLD_PER_TICK;
     } else {
-      baseRate = 100n;
+      baseRate = BASE_GOLD_PER_TICK;
     }
     return BigInt(Math.floor(Number(baseRate) * multiplier));
   }

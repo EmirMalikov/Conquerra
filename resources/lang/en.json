@@ -1558,14 +1558,11 @@
     "account": "Account",
     "clans": "Clans",
     "copyright": "© OpenFront™ and Contributors",
-    "create": "Create Lobby",
     "discord_avatar_alt": "Discord profile avatar",
     "game_name": "TerraClash",
-    "github": "GitHub",
     "go_to_troubleshooting": "Go to our troubleshooting page",
     "help": "Help",
     "inventory": "Inventory",
-    "join": "Join Lobby",
     "leaderboard": "Leaderboard",
     "license_notice": "GNU AGPL v3 · Source code",
     "login_discord": "Login with Discord",
@@ -1593,8 +1590,7 @@
     "troubleshooting": "Troubleshooting",
     "tutorial": "Tutorial",
     "user_avatar_alt": "{username}'s avatar",
-    "welcome": "Welcome, Commander",
-    "wiki": "Wiki"
+    "welcome": "Welcome, Commander"
   },
   "map": {
     "achiran": "Achiran",
@@ -2382,7 +2378,6 @@
     "trusted_locked": "Trusted accounts only. Your account isn't trusted yet.",
     "trusted_tooltip_title": "Trusted lobby",
     "trusted_unlocked": "Trusted accounts only. Your account is trusted.",
-    "upcoming": "Upcoming",
     "waiting_for_players": "Waiting for players"
   },
   "purchase_nudge": {

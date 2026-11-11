@@ -1,5 +1,6 @@
 import { PlayerInfo, PlayerType } from "@openfront/engine-api/game/GameTypes";
 import { GameID } from "@openfront/engine-api/Schemas";
+import { BASE_GOLD_PER_TICK } from "@openfront/engine/configuration/EngineConfig";
 import { DonateGoldExecution } from "@openfront/engine/execution/DonateGoldExecution";
 import { DonateTroopsExecution } from "@openfront/engine/execution/DonateTroopExecution";
 import { SpawnExecution } from "@openfront/engine/execution/SpawnExecution";
@@ -120,8 +121,8 @@ describe("Donate gold to an ally", () => {
     game.executeNextTick();
     game.executeNextTick();
 
-    // 1 tick elapsed; PlayerExecution adds 100n passive income from workers
-    const passiveIncome = 100n;
+    // 1 tick elapsed; PlayerExecution adds BASE_GOLD_PER_TICK passive income from workers
+    const passiveIncome = BASE_GOLD_PER_TICK;
     expect(donor.gold()).toBe(donorGoldBefore - 5000n + passiveIncome);
     expect(recipient.gold()).toBe(recipientGoldBefore + 5000n + passiveIncome);
   });
@@ -150,8 +151,8 @@ describe("Donate gold to an ally", () => {
     game.addExecution(donation);
     game.executeNextTick();
     game.executeNextTick();
-    // 1 tick elapsed for donation transfer; PlayerExecution adds 100n passive income from workers
-    const passiveIncome = 100n;
+    // 1 tick elapsed for donation transfer; PlayerExecution adds BASE_GOLD_PER_TICK passive income from workers
+    const passiveIncome = BASE_GOLD_PER_TICK;
     const expectedDonation = goldBefore / 3n;
     expect(donor.gold()).toBe(goldBefore - expectedDonation + passiveIncome);
     expect(recipient.gold()).toBe(recBefore + expectedDonation + passiveIncome);

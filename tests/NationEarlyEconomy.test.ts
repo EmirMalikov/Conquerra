@@ -6,10 +6,16 @@ import {
   UnitType,
 } from "@openfront/engine-api/game/GameTypes";
 import { PseudoRandom } from "@openfront/engine-lib/PseudoRandom";
+import { ECONOMY_BUILDING_BASE_COST } from "@openfront/engine/configuration/EngineConfig";
 import { ConstructionExecution } from "@openfront/engine/execution/ConstructionExecution";
 import { NationStructureBehavior } from "@openfront/engine/execution/nation/NationStructureBehavior";
 import { UpgradeStructureExecution } from "@openfront/engine/execution/UpgradeStructureExecution";
 import { createGame, L, W } from "./core/pathfinding/_fixtures";
+
+// The perceived prices below were measured at upstream's 125k building base;
+// they scale 1:1 with ECONOMY_BUILDING_BASE_COST (every term is a multiple).
+const scaled = (upstream: bigint): bigint =>
+  (upstream * BigInt(ECONOMY_BUILDING_BASE_COST)) / 125_000n;
 
 // size x size with a lake in the middle half: `nation` owns the west coast, `other` the
 // east coast, optionally with team spawn areas on either shore. When landlocked, `coast`
@@ -180,12 +186,12 @@ describe("Nation economy at the start", () => {
   // Real city costs: 500k for the third, 1M from the fourth on. Harder nations start saving
   // later and inflate cities less while they do.
   it.each([
-    [Difficulty.Medium, 2, 500_000n],
-    [Difficulty.Medium, 4, 4_200_000n],
-    [Difficulty.Hard, 3, 1_000_000n],
-    [Difficulty.Hard, 4, 3_400_000n],
-    [Difficulty.Impossible, 4, 1_000_000n],
-    [Difficulty.Impossible, 5, 3_000_000n],
+    [Difficulty.Medium, 2, scaled(500_000n)],
+    [Difficulty.Medium, 4, scaled(4_200_000n)],
+    [Difficulty.Hard, 3, scaled(1_000_000n)],
+    [Difficulty.Hard, 4, scaled(3_400_000n)],
+    [Difficulty.Impossible, 4, scaled(1_000_000n)],
+    [Difficulty.Impossible, 5, scaled(3_000_000n)],
   ])(
     "%s: with %i cities the next one feels like %i",
     (difficulty, owned, perceived) => {
@@ -202,11 +208,11 @@ describe("Nation economy at the start", () => {
   // A MIRV and a hydrogen bomb cost 30M: Hard saves for it within 5 minutes of income, Impossible
   // within 6, and income earned so far counts twice as the current rate
   it.each([
-    [Difficulty.Medium, 4, 0n, 4_200_000n],
-    [Difficulty.Hard, 4, 2_900_000n, 1_000_000n],
-    [Difficulty.Hard, 4, 3_000_000n, 3_400_000n],
-    [Difficulty.Impossible, 5, 2_400_000n, 1_000_000n],
-    [Difficulty.Impossible, 5, 2_500_000n, 3_000_000n],
+    [Difficulty.Medium, 4, 0n, scaled(4_200_000n)],
+    [Difficulty.Hard, 4, 2_900_000n, scaled(1_000_000n)],
+    [Difficulty.Hard, 4, 3_000_000n, scaled(3_400_000n)],
+    [Difficulty.Impossible, 5, 2_400_000n, scaled(1_000_000n)],
+    [Difficulty.Impossible, 5, 2_500_000n, scaled(3_000_000n)],
   ])(
     "%s: with %i cities and %i gold earned in the first minute, the next city feels like %i",
     (difficulty, owned, income, perceived) => {
@@ -222,8 +228,8 @@ describe("Nation economy at the start", () => {
 
   // Cities disabled: about one city per 2000 tiles. The second port costs 250k, 400k while saving
   it.each([
-    [100, 2_500, 250_000n],
-    [200, 10_000, 400_000n],
+    [100, 2_500, scaled(250_000n)],
+    [200, 10_000, scaled(400_000n)],
   ])(
     "without cities, on a %i-wide map (%i tiles) the second port feels like %i",
     (size, tiles, perceived) => {

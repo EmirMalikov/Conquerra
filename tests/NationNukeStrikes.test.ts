@@ -12,6 +12,7 @@ import {
   NukeMagnitude,
 } from "@openfront/engine-lib/configuration/Config";
 import { PseudoRandom } from "@openfront/engine-lib/PseudoRandom";
+import { ATOM_BOMB_COST } from "@openfront/engine/configuration/EngineConfig";
 import { AttackExecution } from "@openfront/engine/execution/AttackExecution";
 import { NationAllianceBehavior } from "@openfront/engine/execution/nation/NationAllianceBehavior";
 import { NationAttackBehavior } from "@openfront/engine/execution/nation/NationAttackBehavior";
@@ -399,12 +400,13 @@ describe("Nation strike nukes", () => {
 });
 
 describe("Nation nuke saving", () => {
-  // Easy & Medium, and team games, never forget; Hard & Impossible take 3000 ticks to get back to the real 750k
+  // Easy & Medium, and team games, never forget; Hard & Impossible take 3000 ticks to get back to the real price
   it.each([
     [Difficulty.Medium, false, 3000, 10_000_000n],
     [Difficulty.Hard, false, 0, 10_000_000n],
-    [Difficulty.Hard, false, 1500, 5_375_000n],
-    [Difficulty.Impossible, false, 3000, 750_000n],
+    // Halfway back from 10M to the real price after 1500 of 3000 ticks.
+    [Difficulty.Hard, false, 1500, (10_000_000n + BigInt(ATOM_BOMB_COST)) / 2n],
+    [Difficulty.Impossible, false, 3000, BigInt(ATOM_BOMB_COST)],
     [Difficulty.Hard, true, 3000, 10_000_000n],
   ])(
     "%s, teams: %s, %i ticks after a launch, an atom bomb that felt like 10M feels like %i",
@@ -431,8 +433,9 @@ describe("Nation nuke saving", () => {
 
     nukeBehavior["sendNuke"](game.ref(150, 100), UnitType.AtomBomb, human);
 
+    // A launch makes the next one feel 1.5x the real price.
     expect(nukeBehavior["getPerceivedNukeCost"](UnitType.AtomBomb)).toBe(
-      1_125_000n,
+      (BigInt(ATOM_BOMB_COST) * 3n) / 2n,
     );
   });
 
